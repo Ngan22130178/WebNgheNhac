@@ -1,0 +1,21 @@
+[
+  {
+    "_id": "660d1b5c9f1a2c3d4e5f7001",
+    "title": "Chúng Ta Của Tương Lai",
+    "artist": "Sơn Tùng M-TP",
+    "audioUrl": "https://res.cloudinary.com/demo/video/upload/v123456/chung_ta_cua_tuong_lai.mp3",
+    "uploaderId": "660d1a2b9f1a2c3d4e5f6001",
+    "lyricsMap": {
+      "vi": [
+        { "time": 0.0, "content": "[Đoạn dạo nhạc đầu bài]" },
+        { "time": 12.5, "content": "Hình bóng ai đó nhẹ nhàng vụt qua nơi đây" },
+        { "time": 16.8, "content": "Quyện vào làn gió thoảng hương dịu dàng đắm say" }
+      ],
+      "en": [
+        { "time": 0.0, "content": "[Intro Music]" },
+        { "time": 12.5, "content": "Someone's shadow gently passes by this place" },
+        { "time": 16.8, "content": "Blending into the breeze with a sweet intoxicating scent" }
+      ]
+    }
+  }
+]
