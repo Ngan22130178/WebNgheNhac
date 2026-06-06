@@ -1,0 +1,9 @@
+vn\edu\nlu\fit\musicweb\model\Song$LyricLine.class
+vn\edu\nlu\fit\musicweb\repository\PlaylistAlbumRepository.class
+vn\edu\nlu\fit\musicweb\controller\PersonalController.class
+vn\edu\nlu\fit\musicweb\model\User.class
+vn\edu\nlu\fit\musicweb\repository\UserRepository.class
+vn\edu\nlu\fit\musicweb\repository\SongRepository.class
+vn\edu\nlu\fit\musicweb\model\PlaylistAlbum.class
+vn\edu\nlu\fit\musicweb\model\Song.class
+vn\edu\nlu\fit\musicweb\MusicWebApplication.class
