@@ -145,6 +145,9 @@ Khi người dùng upload file `.lrc`, sử dụng Regex trong Java để parse.
 * **Database:** Hạn chế xóa cứng (Hard Delete), ưu tiên dùng flag `isDeleted` hoặc `isEnabled`.
 * **Frontend:** Sử dụng Vanilla JS hoặc các Lightweight Framework để đảm bảo tốc độ phản hồi.
 
+# 📂 Cấu Trúc Thư Mục Dự Án & Chú Thích Ý Nghĩa Kỹ Thuật
+
+```text
 WebNgheNhac/
 ├── 📄 pom.xml                             # Nơi khai báo các thư viện (Maven Dependencies) như Spring Web, Mongo, Jasper.
 ├── 📄 mvnw.cmd                            # Bộ chạy Maven Wrapper trên Windows, giúp build dự án không cần cài cấu hình biến môi trường.
