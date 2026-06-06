@@ -61,3 +61,4 @@ if not "%FORCE_EXIT_ON_ERROR%" == "" (
   if %ERROR_CODE% neq 0 exit %ERROR_CODE%
 )
 exit /b %ERROR_CODE%
+

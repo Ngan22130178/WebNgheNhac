@@ -7,6 +7,8 @@ import java.util.List;
 
 @Repository
 public interface SongRepository extends MongoRepository<Song, String> {
-    //lấy bài hát cá nhân theo uploaderId
+
     List<Song> findByUploaderId(String uploaderId);
+
+    List<Song> findByTitleContainingIgnoreCase(String title);
 }
