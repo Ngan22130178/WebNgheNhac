@@ -94,3 +94,36 @@ sequenceDiagram
 * **Database:** Ưu tiên `isDeleted` flag cho xóa mềm thay vì xóa cứng dữ liệu.
 
 ---
+
+
+```text
+MusicWeb-Project/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/musicweb/
+│   │   │       ├── controller/      # Xử lý các request HTMX & API
+│   │   │       ├── model/           # Song, SongLyrics, User (MongoDB entities)
+│   │   │       ├── repository/      # MongoDB Repositories
+│   │   │       ├── service/         # Logic nghiệp vụ (Lyrics parsing, Queue)
+│   │   │       └── config/          # Cấu hình Virtual Threads (Java 21)
+│   │   ├── resources/
+│   │   │   ├── static/
+│   │   │   │   ├── css/             # Styles (Dark mode, Custom)
+│   │   │   │   └── js/
+│   │   │   │       ├── player-core.js     # [TÂM ĐIỂM] Logic Next/Prev/Loop/Shuffle
+│   │   │   │       ├── player-controls.js # Tương tác UI (Volume, Seek, Play)
+│   │   │   │       └── ui-helper.js       # Utils (Format time, DOM updates)
+│   │   │   └── webapp/
+│   │   │       └── WEB-INF/jsp/
+│   │   │           ├── index.jsp        # Khung layout chính (Header, Footer, Table Frame)
+│   │   │           └── fragments/       # Các mảnh (Fragments) cho HTMX
+│   │   │               ├── header.jsp   # Navbar (hx-target="#songListBody")
+│   │   │               ├── songs_table.jsp # [TÂM ĐIỂM] Chỉ chứa các <tr> (Dữ liệu động)
+│   │   │               ├── player.jsp   # Component Audio Player
+│   │   │               └── footer.jsp   # Footer thông tin
+├── README.md                            # Tổng quan dự án
+└── pom.xml                              # Khai báo Spring Boot 4.0.6, MongoDB, v.v.
+
+```
+
