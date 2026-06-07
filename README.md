@@ -1,204 +1,129 @@
-# 📘 Tài Liệu Thiết Kế Hệ Thống - Music App (V2.0)
+# 📘 Tài Liệu Thiết Kế Hệ Thống - Music App (V2.1 - Updated)
 
 ## 1. Tổng Quan Kỹ Thuật (Tech Stack)
 
 * **Backend:** Java 21 (LTS), Spring Boot 4.0.6.
-* **Database:** MongoDB (NoSQL).
-* **Kiến trúc:** Micro-monolith (hướng dịch vụ), AJAX-driven UI (không load lại trang để giữ nhạc).
-* **Định dạng lời nhạc:** Standard `.lrc` (Lyric Runtime Control).
+* **Database:** MongoDB (NoSQL) - Lưu trữ linh hoạt, hỗ trợ lời nhạc đa ngôn ngữ.
+* **Frontend:**
+* **JSP + JSTL:** Template engine tạo giao diện server-side.
+* **HTMX:** Xử lý render động, giúp chuyển hướng trang không bị load lại (Single-Page feel).
+* **Bootstrap 5:** Giao diện Responsive & Dark Mode.
+
+
+* **Định dạng lời nhạc:** `.lrc` (Parsed & Map-stored).
 
 ---
 
-## 2. Mô Hình Dữ Liệu (Data Model)
+## 2. Mô Hình Dữ Liệu & Logic Trình Phát
 
-Thiết kế tập trung vào tính linh hoạt của MongoDB để xử lý lời nhạc đa ngôn ngữ.
+### 2.1. Logic State Machine cho Player (Player-Core)
 
-### 2.1. User Entity
+Để đảm bảo tính nhất quán của trình phát nhạc, hệ thống sử dụng một biến `loopMode` và danh sách `queue` làm nguồn sự thật duy nhất (Single Source of Truth).
 
-Quản lý định danh và trạng thái tài khoản.
-
-* `id`: String (ObjectId).
-* `username`: String (Unique Index).
-* `role`: Enum (ADMIN, USER).
-* `isEnabled`: Boolean (Dùng cho chức năng khóa/mở tài khoản của Admin).
-
-### 2.2. Song Entity (Multi-language Support)
-
-Điểm mấu chốt là `lyricsMap` cho phép một bài hát có nhiều bản dịch.
-
-```java
-@Document(collection = "songs")
-public class Song {
-    @Id
-    private String id;
-    @TextIndexed
-    private String title;  // Đánh chỉ mục Text để search gợi ý
-    private String artist;
-    private String audioUrl;
-    private String uploaderId;
-    
-    // Key: "vi", "en", "jp"... 
-    // Value: List các dòng lời tương ứng
-    private Map<String, List<LyricLine>> lyricsMap; 
-}
-
-public class LyricLine {
-    private double time;     // Thời điểm bắt đầu câu hát (giây)
-    private String content;  // Nội dung câu hát
-}
-
-```
+| Trạng thái (`loopMode`) | Ý nghĩa | Hành vi `nextSong()` |
+| --- | --- | --- |
+| `0` | Bình thường | Tăng index, dừng ở cuối queue. |
+| `1` | Lặp 1 bài | Reset `currentTime = 0`, `play()` lại. |
+| `2` | Lặp tất cả | Quay vòng về index 0 sau bài cuối. |
+| `3` | Xáo trộn | Chọn index ngẫu nhiên (dùng Fisher-Yates). |
 
 ---
 
-## 3. Các Luồng Nghiệp Vụ Chính (Sequence Diagrams)
+## 3. Quy trình xử lý lỗi Giao diện (HTMX Integration)
 
-### 3.1. Tìm kiếm không ngắt nhạc (AJAX Search)
+Để tránh lỗi **"Bảng lồng bảng"** và lặp lại Header/Navbar, tài liệu quy chuẩn lại cấu trúc View:
 
-Đảm bảo khi tìm kiếm, Player ở phía dưới không bị Reset.
+1. **Khung cố định (Layout):** `index.jsp` chứa `Navbar`, `Footer`, và `<table>` (khung `<thead>`).
+2. **Khu vực thay đổi (Target):** `<tbody>` với `id="songListBody"`.
+3. **Luồng HTMX:** Khi người dùng click menu, HTMX chỉ fetch file JSP chứa các dòng `<tr>` và chèn vào `songListBody`.
+* **Quy chuẩn:** Controller phải trả về view chỉ chứa `<c:forEach>` các hàng dữ liệu, tuyệt đối không trả về `<html>` hoặc `navbar`.
+
+
+
+---
+
+## 4. Các Luồng Nghiệp Vụ Chính (Sequence Diagrams)
+
+### 4.1. Luồng Next/Prev (Vòng lặp danh sách)
+
+Sử dụng toán tử Modulo (`%`) để đảm bảo tính tuần hoàn.
 
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant JS as AJAX Engine
-    participant API as Spring Boot 4.0.6
-    participant DB as MongoDB
+    participant CORE as Player-Core.js
+    participant P as Audio Element
 
-    U->>JS: Nhập từ khóa (onInput)
-    Note right of JS: Debounce 300ms tránh spam API
-    JS->>API: GET /api/songs/search?q=...
-    API->>DB: Query với @TextIndexed
-    DB-->>API: Trả về kết quả
-    API-->>JS: JSON (SongDTO)
-    JS->>U: Hiển thị danh sách gợi ý
-
-```
-
-### 3.2. Đồng bộ lời nhạc & Chuyển bài (Lyric Sync)
-
-Cơ chế xử lý lời nhạc thời gian thực tại Client.
-
-```mermaid
-sequenceDiagram
-    participant A as Audio Element
-    participant JS as Music Engine
-    participant UI as Lyric Display (>> Mode)
-
-    loop Mỗi 250ms
-        A->>JS: Lấy currentTime
-        JS->>JS: So khớp time với lyricsMap[lang]
-        JS->>UI: Highlight dòng hiện tại & Smooth Scroll
-    end
-
-    A->>JS: Sự kiện 'ended'
-    JS->>JS: Xử lý Logic (Shuffle / Repeat One - All)
-    JS->>A: Cập nhật src bài mới & .play()
+    U->>CORE: Nhấn Next / Prev
+    CORE->>CORE: Tính toán currentIndex (Modulo %)
+    Note over CORE: Xử lý LoopMode (0-3)
+    CORE->>P: Cập nhật .src (bài hát mới)
+    CORE->>P: .load() & .play()
 
 ```
 
 ---
 
-## 4. Đặc Tả Use Cases Cho Lập Trình Viên
+## 5. Đặc Tả Implementation (Backend & Frontend)
 
-### UC-01: Quản lý cá nhân (Self-Service)
+### 5.1. Xử lý Lời nhạc (.lrc)
 
-* **Mô tả:** Người dùng quản lý Album, Playlist và thông tin cá nhân.
-* **Lưu ý kỹ thuật:** Luôn kiểm tra `ownerId` tại tầng Service. Chỉ cho phép chỉnh sửa nếu `currentUser.id == resource.ownerId`.
+* **Regex:** `\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)`
+* **Lưu trữ:** Mỗi bài hát có một `lyricsMap` (key: mã ngôn ngữ, value: list các object `{time, content}`).
 
-### UC-02: Chế độ Xem lời (Lyric View Mode)
+### 5.2. Tối ưu hóa Java 21
 
-* **Giao diện:** Khi bấm nút `>>`, nội dung chính ẩn đi, màn hình lời toàn cảnh hiện lên.
-* **Logic:** Chuyển đổi trạng thái bằng CSS Class thay vì load lại trang để bảo toàn luồng Audio.
-
-### UC-03: Quản trị Admin
-
-* **Mô tả:** Khóa người dùng, xóa bài hát vi phạm.
-* **Bảo mật:** Sử dụng `@PreAuthorize("hasRole('ADMIN')")` tại Controller.
+* **Virtual Threads:** Cấu hình `spring.threads.virtual.enabled=true` để tăng khả năng xử lý đồng thời cho các tác vụ I/O khi người dùng tải bài hát lên hoặc truy vấn dữ liệu từ MongoDB.
 
 ---
 
-## 5. Hướng dẫn Triển Khai (Implementation Guide)
+## 6. Danh mục Checklist Kiểm thử (QA Checklist)
 
-### 1. Xử lý File .lrc
-
-Khi người dùng upload file `.lrc`, sử dụng Regex trong Java để parse.
-
-* **Regex mẫu:** `\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)`
-* **Chuyển đổi:** `(phút * 60) + giây + (mili / 1000)` -> Lưu vào trường `time` (double).
-
-### 2. Tối ưu Java 21
-
-* Sử dụng **Virtual Threads** cho các tác vụ I/O nặng (như upload file lên Cloudinary) bằng cách cấu hình:
-`spring.threads.virtual.enabled=true`.
-
-### 3. Phân vùng UI
-
-* **Fixed Player:** Luôn nằm ở Bottom.
-* **Dynamic Content:** Nằm ở giữa, load qua AJAX.
-* **Sidebar Queue:** Hiển thị danh sách bài tiếp theo khi click icon mở rộng.
+* [x] **Next/Prev:** Bài cuối bấm Next phải về đầu, bài đầu bấm Prev phải về cuối.
+* [x] **Loop Mode 1:** Khi hết nhạc phải tự phát lại chính bài đó, không chuyển bài.
+* [x] **HTMX Integration:** Kiểm tra tab Network, đảm bảo kết quả trả về là `fragment` (không chứa header thừa).
+* [x] **Shuffle:** Thuật toán Fisher-Yates xáo trộn mảng `queue` gốc.
+* [x] **Performance:** Đảm bảo `Debounce` trên thanh tìm kiếm để tránh gọi DB liên tục.
 
 ---
 
-## 6. Quy chuẩn Code (Coding Standard)
+## 7. Quy chuẩn Code (Coding Standard)
 
-* **API:** Trả về định dạng JSON thống nhất qua `ResponseEntity<ResponseDTO>`.
-* **Database:** Hạn chế xóa cứng (Hard Delete), ưu tiên dùng flag `isDeleted` hoặc `isEnabled`.
-* **Frontend:** Sử dụng Vanilla JS hoặc các Lightweight Framework để đảm bảo tốc độ phản hồi.
+* **API:** Trả về JSON chuẩn qua `ResponseEntity<ResponseDTO>`.
+* **Frontend:** Không trùng lặp định nghĩa hàm giữa `player-core.js` và `player-controls.js`. Ưu tiên tập trung mọi logic `next/prev/play` vào `player-core.js`.
+* **Database:** Ưu tiên `isDeleted` flag cho xóa mềm thay vì xóa cứng dữ liệu.
 
-# 📂 Cấu Trúc Thư Mục Dự Án & Chú Thích Ý Nghĩa Kỹ Thuật
+---
+
 
 ```text
-WebNgheNhac/
-├── 📄 pom.xml                             # Nơi khai báo các thư viện (Maven Dependencies) như Spring Web, Mongo, Jasper.
-├── 📄 mvnw.cmd                            # Bộ chạy Maven Wrapper trên Windows, giúp build dự án không cần cài cấu hình biến môi trường.
-└── 📂 src/
-    └── 📂 main/
-        ├── 📂 java/vn/edu/nlu/fit/musicweb/
-        │   │
-        │   ├── 📄 MusicwebApplication.java      # Điểm khởi chạy (Entry Point) của toàn bộ ứng dụng Spring Boot.
-        │   │
-        │   ├── 📂 config/                       # [TẦNG CẤU HÌNH] - Thiết lập các thông số vận hành toàn cục của hệ thống.
-        │   │   ├── 📄 MongoConfig.java          # Cấu hình kết nối DB, tự động quét và tạo các chỉ mục như Tìm kiếm văn bản.
-        │   │   └── 📄 SecurityConfig.java       # Bộ lọc bảo mật: Chặn truy cập trái phép, phân quyền Admin, mã hóa mật khẩu User.
-        │   │
-        │   ├── 📂 model/                        # [TẦNG THỰC THỂ/ENTITY] - Định nghĩa cấu trúc dữ liệu lưu trong MongoDB.
-        │   │   ├── 📄 User.java                 # Ánh xạ thông tin tài khoản người dùng, phân quyền (Role) và mảng bài hát yêu thích.
-        │   │   ├── 📄 Song.java                 # Thực thể bài hát chính, chứa cấu trúc Map nhúng (lyricsMap) để lưu lời đa ngôn ngữ.
-        │   │   └── 📄 LyricLine.java            # Cấu trúc con của câu hát, quy đổi mốc thời gian LRC về dạng số thực (giây) để máy tính hiểu.
-        │   │
-        │   ├── 📂 dto/                          # [DATA TRANSFER OBJECT] - Các lớp bọc dữ liệu trung gian khi truyền tải qua mạng.
-        │   │   ├── 📄 SongDTO.java              # Bản rút gọn của Song (chỉ giữ tên, ca sĩ, ảnh). Dùng khi tìm kiếm để không phải tải mảng lời rất nặng.
-        │   │   └── 📄 ResponseDTO.java          # Chuẩn hóa định dạng JSON đầu ra (status, message, data) giúp Frontend dễ xử lý lỗi.
-        │   │
-        │   ├── 📂 repository/                   # [TẦNG TRUY VẤN/DATA ACCESS] - Cung cấp các hàm giao tiếp trực tiếp với MongoDB.
-        │   │   ├── 📄 UserRepository.java       # Chứa các hàm tìm kiếm tài khoản, phục vụ logic Đăng nhập/Đăng ký.
-        │   │   └── 📄 SongRepository.java       # Chứa các hàm tìm kiếm bài hát theo từ khóa (@TextIndexed) hoặc bốc Top bài hát để làm BXH.
-        │   │
-        │   ├── 📂 service/                      # [TẦNG NGHIỆP VỤ/BUSINESS LOGIC] - Nơi xử lý các thuật toán và quy tắc cốt lõi của ứng dụng.
-        │   │   ├── 📄 UserService.java          # Xử lý logic đăng ký (kiểm tra trùng tên), logic kiểm tra quyền sở hữu Playlist cá nhân.
-        │   │   └── 📄 SongService.java          # Chứa thuật toán chạy Regex để dịch file text .lrc thành dữ liệu, xử lý bộ đếm lượt nghe.
-        │   │
-        │   └── 📂 controller/                   # [TẦNG TIẾP NHẬN REQUEST] - Cửa ngõ đón nhận các yêu cầu gửi lên từ giao diện người dùng.
-        │       ├── 📄 PageController.java       # Dùng @Controller truyền thống để điều hướng và hiển thị các trang giao diện JSP.
-        │       ├── 📄 SongController.java       # Dùng @RestController để trả về JSON, xử lý luồng Stream nhạc Byte-Range (tua nhạc).
-        │       └── 📄 UserController.java       # Dùng @RestController để xử lý nhanh các tương tác như bấm nút Thả tim, thêm bài vào Queue.
-        │
-        ├── 📂 resources/                        # Thư mục chứa các tài nguyên bổ trợ ngầm cho Backend và các file tĩnh của Frontend.
-        │   ├── 📂 static/                       # Nơi chứa tài nguyên tĩnh do trình duyệt tải về và lưu vào bộ nhớ đệm (Cache).
-        │   │   ├── 📂 css/                      # Chứa file style.css để định hình giao diện (TailwindCSS) và các hiệu ứng chữ sáng lên khi chạy lời.
-        │   │   ├── 📂 js/                       # Trọng tâm xử lý UX: audio-player.js (điều khiển nhạc, đồng bộ lời, lưu hàng đợi vào localStorage).
-        │   │   └── 📂 assets/                   # Nơi chứa các tệp vật lý chạy thử của bạn (file nhạc .mp3, file lời mẫu .lrc, hình ảnh bìa).
-        │   │
-        │   └── 📄 application.properties        # File chứa các tham số cài đặt hệ thống (Cổng chạy, kết nối DB, bật luồng ảo Virtual Threads).
-        │
-        └── 📂 webapp/                           # Thư mục gốc chứa toàn bộ các trang giao diện hiển thị cho người dùng (Frontend).
-            └── 📂 WEB-INF/
-                └── 📂 views/                    # Vùng an toàn (Bảo mật cao), chặn người dùng truy cập trực tiếp file giao diện từ URL của trình duyệt.
-                    ├── 📄 index.jsp             # Trang chủ cố định. Nơi chứa thanh điều khiển nhạc ở đáy trang (Fixed Bottom Player) không bao giờ reload.
-                    │
-                    └── 📂 fragments/            # [PHÂN VÙNG GIAO DIỆN ĐỘNG] - Nơi chứa các mảnh giao diện nhỏ để nạp vào giữa trang thông qua AJAX/HTMX.
-                        ├── 📄 home-content.jsp  # Mảnh nội dung chứa danh sách bài hát mới, Bảng xếp hạng.
-                        ├── 📄 search-results.jsp# Mảnh nội dung hiển thị danh sách kết quả sau khi người dùng tìm kiếm.
-                        └── 📄 lyric-fullscreen.jsp # Mảnh giao diện kích hoạt Chế độ xem lời toàn màn hình khi người dùng bấm nút `>>`.
+MusicWeb-Project/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/musicweb/
+│   │   │       ├── controller/      # Xử lý các request HTMX & API
+│   │   │       ├── model/           # Song, SongLyrics, User (MongoDB entities)
+│   │   │       ├── repository/      # MongoDB Repositories
+│   │   │       ├── service/         # Logic nghiệp vụ (Lyrics parsing, Queue)
+│   │   │       └── config/          # Cấu hình Virtual Threads (Java 21)
+│   │   ├── resources/
+│   │   │   ├── static/
+│   │   │   │   ├── css/             # Styles (Dark mode, Custom)
+│   │   │   │   └── js/
+│   │   │   │       ├── player-core.js     # [TÂM ĐIỂM] Logic Next/Prev/Loop/Shuffle
+│   │   │   │       ├── player-controls.js # Tương tác UI (Volume, Seek, Play)
+│   │   │   │       └── ui-helper.js       # Utils (Format time, DOM updates)
+│   │   │   └── webapp/
+│   │   │       └── WEB-INF/jsp/
+│   │   │           ├── index.jsp        # Khung layout chính (Header, Footer, Table Frame)
+│   │   │           └── fragments/       # Các mảnh (Fragments) cho HTMX
+│   │   │               ├── header.jsp   # Navbar (hx-target="#songListBody")
+│   │   │               ├── songs_table.jsp # [TÂM ĐIỂM] Chỉ chứa các <tr> (Dữ liệu động)
+│   │   │               ├── player.jsp   # Component Audio Player
+│   │   │               └── footer.jsp   # Footer thông tin
+├── README.md                            # Tổng quan dự án
+└── pom.xml                              # Khai báo Spring Boot 4.0.6, MongoDB, v.v.
 
+```
 
