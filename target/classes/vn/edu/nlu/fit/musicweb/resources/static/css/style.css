@@ -1,0 +1,86 @@
+/* Đảm bảo menu nằm trên tất cả thành phần khác */
+.player-menu-panel {
+    position: absolute;
+    bottom: 80px; 
+    right: 20px;
+    width: 300px;
+    background-color: #212529;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    z-index: 1050;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* Định dạng chữ trắng cho lời bài hát */
+#modalLyricsContent {
+    color: #ffffff !important;
+    font-size: 1.1rem;
+}
+.lyrics-panel {
+    position: absolute;
+    bottom: 80px; /* Cách thanh player một khoảng */
+    right: 20px;
+    width: 350px;
+    height: 400px;
+    background-color: rgba(30, 30, 30, 0.95); /* Màu nền tối mờ */
+    border: 1px solid #444;
+    border-radius: 10px;
+    color: white; /* Màu chữ trắng */
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.lyrics-content {
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: center;
+    white-space: pre-line; /* Giữ định dạng xuống dòng */
+}
+
+.lyrics-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
+/* Định dạng chung cho các popup menu dưới trình phát */
+.player-menu-panel {
+    position: absolute;
+    bottom: 80px; 
+    right: 20px;
+    width: 320px;
+    max-height: 350px;
+    background-color: #212529; /* Màu nền tối giống footer/player */
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1050;
+    overflow-y: auto;
+}
+
+/* Định dạng riêng cho danh sách bài hát trong queue */
+.queue-item {
+    padding: 8px;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+}
+
+.queue-item:hover {
+    background-color: #343a40;
+}
+
+/* Định dạng riêng cho khung lời */
+.lyrics-display {
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    color: #e0e0e0;
+}

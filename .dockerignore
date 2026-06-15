@@ -1,0 +1,9 @@
+target
+.git
+.github
+.vscode
+*.md
+*.log
+*.tmp
+**/node_modules
+**/dist
