@@ -1,27 +1,21 @@
 package vn.edu.nlu.fit.musicweb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-import vn.edu.nlu.fit.musicweb.model.Song;
+import org.springframework.web.bind.annotation.ResponseBody;
 import vn.edu.nlu.fit.musicweb.model.SongLyrics;
-import vn.edu.nlu.fit.musicweb.repository.SongRepository;
-
-import java.util.Collections;
+import vn.edu.nlu.fit.musicweb.repository.SongLyricsRepository;
 import java.util.List;
-
-@RestController // Dùng @RestController thay vì @Controller + @ResponseBody cho API
+@Controller
 public class SongController {
 
     @Autowired
-    private SongRepository songRepository;
-
+    private SongLyricsRepository songLyricsRepository;
     @GetMapping("/api/songs/{id}/lyrics")
-    public List<SongLyrics> getLyricsBySong(@PathVariable String id) {
-        // Truy xuất trực tiếp từ document Song
-        return songRepository.findById(id)
-                             .map(Song::getLyricsList)
-                             .orElse(Collections.emptyList());
+    @ResponseBody
+    public List<SongLyrics> getLyricsBySong(@PathVariable Long id) {
+        return songLyricsRepository.findBySongId(id);
     }
 }

@@ -1,30 +1,31 @@
 package vn.edu.nlu.fit.musicweb.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "songs") // Thay thế @Entity và @Table
+@Entity
+@Table(name = "songs")
 public class Song {
-    @Id // Dùng cho MongoDB _id
-    private String id; // Chuyển từ Long sang String
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Indexed // Tăng tốc độ tìm kiếm
+    @Column(nullable = false)
     private String title;
 
     private String artist;
     private String url; 
-    @Indexed
-    private String genre;
+    private String genre; 
     private String albumName; 
 
-    // MongoDB nhúng trực tiếp đối tượng SongLyrics vào đây
+    // Quan hệ 1-N: Lưu danh sách lời bài hát
+    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SongLyrics> lyricsList = new ArrayList<>();
 
     public Song() {}
 
+    // Constructor chuẩn (không bao gồm id vì DB tự sinh)
     public Song(String title, String artist, String url, String genre, String albumName) {
         this.title = title;
         this.artist = artist;
@@ -33,9 +34,8 @@ public class Song {
         this.albumName = (albumName != null) ? albumName : "Chưa xác định";
     }
 
-    // Getters và Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Các Getter và Setter đầy đủ
+    public Long getId() { return id; }
     
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -55,8 +55,9 @@ public class Song {
     public List<SongLyrics> getLyricsList() { return lyricsList; }
     public void setLyricsList(List<SongLyrics> lyricsList) { this.lyricsList = lyricsList; }
     
-    // Helper method
+    // Helper method để thêm lời vào bài hát (giúp đồng bộ 2 chiều)
     public void addLyrics(SongLyrics lyrics) {
-        this.lyricsList.add(lyrics);
+        lyricsList.add(lyrics);
+        lyrics.setSong(this);
     }
 }
