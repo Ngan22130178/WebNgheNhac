@@ -17,3 +17,11 @@
         </td>
     </tr>
 </c:forEach>
+
+<c:if test="${empty songs && not empty keyword}">
+    <tr>
+        <td colspan="5" class="text-center text-warning py-4">
+            ❌ Không có bài hát phù hợp với từ khóa: "<strong>${keyword}</strong>"
+        </td>
+    </tr>
+</c:if>
