@@ -16,33 +16,64 @@ public class SongController {
 
     @Autowired // tự động kết nối SongRepository vào controller
     private SongRepository songRepository;
-   
+
     @GetMapping("/api/songs/{id}/lyrics")
     @ResponseBody
     public List<SongLyrics> getLyricsBySong(@PathVariable Long id) {
         return songLyricsRepository.findBySongId(id);
     }
+    @GetMapping("/song/lyrics/{id}")
+    public String showSongLyrics(@PathVariable Long id, Model model) {
+        // Lấy danh sách lời bài hát từ repository bằng id bài hát
+        List<SongLyrics> lyricsList = songLyricsRepository.findBySongId(id);
+        
+        // Nếu tìm thấy lời bài hát, lấy phần tử đầu tiên ra để hiển thị
+        if (lyricsList != null && !lyricsList.isEmpty()) {
+            model.addAttribute("lyrics", lyricsList.get(0));
+        } else {
+            model.addAttribute("lyrics", null);
+        }
+        
+        // Trả về file giao diện chứa lời bài hát  
+        return "fragments/lyric_display";
+    }
 
     @GetMapping("/search")
-    public String searchSongs(@RequestParam(value="q", required=false) String keyword, Model model){
+    public String searchSongs(@RequestParam(value = "q", required = false) String keyword, Model model) {
         List<Song> searchResults;
 
-        // Kiểm tra nếu có từ khóa thì tìm theo title 
-        if (keyword != null && !keyword.trim().isEmpty()){
-            searchResults = songRepository.findByTitleContainingIgnoreCase(keyword);
-        } 
+        // Kiểm tra nếu có từ khóa thì tìm theo title
+        if (keyword != null && !keyword.trim().isEmpty()) {
+
+            String cleanKeyword = keyword.trim();
+
+            // Tìm kiếm theo tên bài hát
+            List<Song> songsByTitle = songRepository.findByTitleContainingIgnoreCase(cleanKeyword);
+
+            // Tìm kiếm theo tên ca sĩ
+            List<Song> songsByArtist = songRepository.findByArtistContainingIgnoreCase(cleanKeyword);
+
+            // Bỏ danh sách bài hát vào Set trước để giữ thứ tự và tránh trùng
+            Set<Song> combinedResults = new LinkedHashSet<>(songsByTitle);
+
+            // Nạp danh sách ca sĩ vào Set   
+            combinedResults.addAll(songsByArtist);
+
+            // Chuyển kết quả thành danh sách List để hiển thị
+            searchResults = new ArrayList<>(combinedResults);
+        }
         // Nếu không có từ khóa, trả về danh sách rỗng
-        else{
-            searchResults = new ArrayList<>(); 
+        else {
+            searchResults = new ArrayList<>();
         }
 
-        // Đẩy danh sách bài hát 
+        // Đẩy danh sách bài hát
         model.addAttribute("songs", searchResults);
 
         // Đẩy ngược lại từ khóa để hiển thị trong ô tìm kiếm
         model.addAttribute("keyword", keyword);
 
-        return "fragments/songs_table"; 
+        return "fragments/songs_table";
     }
 
 }

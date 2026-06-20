@@ -1,11 +1,11 @@
-// src/main/resources/static/js/player-core.js
 let queue = [];
 let currentIndex = -1; // Trạng thái nghỉ
 const player = document.getElementById('mainPlayer');
+let currentParsedLyrics = [];
 
 // 1. Luồng phát ngay: Xóa hàng đợi cũ, bắt đầu bài mới
 function playNow(url, title) {
-    queue = [{url, title}];
+    queue = [{ url, title }];
     currentIndex = 0;
     executePlay();
     if (typeof updateQueueMenu === 'function') updateQueueMenu();
@@ -16,9 +16,9 @@ function addToQueue(url, title) {
     const isAlreadyInQueue = queue.some(song => song.url === url);
 
     if (!isAlreadyInQueue) {
-        queue.push({url, title});
+        queue.push({ url, title });
         console.log("Đã thêm vào danh sách:", title);
-        
+
         // Nếu trước đó đang ở trạng thái nghỉ, phát ngay bài này
         if (currentIndex === -1) {
             currentIndex = queue.length - 1;
@@ -31,24 +31,29 @@ function addToQueue(url, title) {
     }
 }
 
-// 3. Hàm thực thi phát (Trái tim của Player)
+// 3. Hàm thực thi phát  
 function executePlay() {
     if (currentIndex >= 0 && currentIndex < queue.length) {
         player.src = queue[currentIndex].url;
-        
+
         const nowPlaying = document.getElementById('nowPlaying');
         if (nowPlaying) nowPlaying.innerText = queue[currentIndex].title;
-        
+
         player.load();
-        
+
         // Xử lý an toàn với chính sách Autoplay của trình duyệt
         player.play().catch(e => {
             console.warn("Tương tác cần thiết để phát nhạc:", e);
         });
-        
+
         const btn = document.getElementById('playPauseBtn');
         if (btn) btn.innerText = "⏸";
         updatePlayPauseButtonUI(true);
+
+        // Xóa lời bài hát cũ khi chuyển sang bài mới để chuẩn bị nạp lời mới
+        currentParsedLyrics = [];
+        const container = document.getElementById('lyricContainer');
+        if (container) container.innerHTML = `<span class="text-muted small italic">Chưa nạp lời. Hãy bấm "Xem lời" ở danh sách!</span>`;
     }
 }
 
@@ -65,7 +70,7 @@ function nextSong() {
     // 2. Chế độ Xáo trộn
     if (loopMode === 3) {
         currentIndex = Math.floor(Math.random() * queue.length);
-    } 
+    }
     // 3. Chế độ Lặp tất cả (2) hoặc Bình thường (0)
     else {
         // Công thức quay vòng: (hiện tại + 1) chia lấy dư cho tổng số
@@ -76,7 +81,7 @@ function nextSong() {
         if (loopMode === 0 && currentIndex === 0) {
             player.pause();
             player.currentTime = 0;
-            updatePlayPauseButtonUI(false); // Cập nhật icon về nút Play
+            updatePlayPauseButtonUI(false); 
             return;
         }
     }
@@ -123,7 +128,7 @@ function formatTime(seconds) {
 }
 
 // Trạng thái hiện tại: 0: Bình thường, 1: Lặp 1 bài, 2: Lặp tất cả, 3: Xáo trộn
-let loopMode = 0; 
+let loopMode = 0;
 
 function toggleLoopMode() {
     loopMode = (loopMode + 1) % 4;
@@ -151,7 +156,7 @@ function updateLoopButtonUI() {
     ];
     btn.innerText = modes[loopMode].icon;
     btn.title = modes[loopMode].text;
-    // Hiệu ứng đổi màu nếu chế độ khác mặc định
+   
     if (loopMode !== 0) {
         btn.classList.add('text-info');
     } else {
@@ -159,7 +164,6 @@ function updateLoopButtonUI() {
     }
 }
 
- 
 function toggleLyrics() {
     const panel = document.getElementById('lyricsPanel');
     panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
@@ -168,7 +172,7 @@ function toggleLyrics() {
 function openLyricsModal(title, content) {
     document.getElementById('lyricsTitle').innerText = title;
     document.getElementById('modalLyricsContent').innerText = content;
-    
+
     // Sử dụng Bootstrap Modal API
     var myModal = new bootstrap.Modal(document.getElementById('lyricsModal'));
     myModal.show();
