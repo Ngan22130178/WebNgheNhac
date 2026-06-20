@@ -83,23 +83,50 @@ sequenceDiagram
 ---
 
 ## 7. Cấu Trúc Thư Mục
-
 ```text
 MusicWeb-Project/
-├── src/main/java/vn/edu/nlu/fit/musicweb/
-│   ├── controller/      # Xử lý HTMX & API
-│   ├── model/           # MongoDB entities
-│   ├── repository/      # MongoDB Repositories
-│   ├── service/         # Logic (Lyrics, Queue)
-│   └── config/          # Cấu hình Virtual Threads
-├── src/main/webapp/WEB-INF/jsp/
-│   ├── index.jsp        # Layout chính
-│   └── fragments/       # Các mảnh (songs_table, header, player)
-└── src/main/resources/static/js/
-    ├── player-core.js   # Logic Next/Prev/Loop/Shuffle
-    └── ui-helper.js     # Utils, DOM updates
-
-```
+├── src/
+│   ├── main/
+│   │   ├── java/vn/edu/nlu/fit/musicweb/
+│   │   │   ├── config/              # Cấu hình hệ thống
+│   │   │   │   ├── MongoConfig.java # Cấu hình kết nối MongoDB
+│   │   │   │   ├── SecurityConfig.java
+│   │   │   │   
+│   │   │   ├── controller/          # Điều hướng request
+│   │   │   │   ├── HomeController.java
+│   │   │   │   ├── SongController.java
+│   │   │   │   └
+│   │   │   ├── model/               # POJO/Entities
+│   │   │   │   ├── Song.java
+│   │   │   │   ├── SongLyrics.java
+│   │   │   │   └── User.java
+│   │   │   ├── repository/          # Interface giao tiếp Database
+│   │   │   │   ├── SongRepository.java
+│   │   │   │   └── SongLyricsRepository.java
+│   │   │   ├── service/             # Logic nghiệp vụ (Không viết logic trong Controller)
+│   │   │   │   ├── SongService.java
+│   │   │   │   └── LyricsService.java
+│   │   │   └── MusicWebApplication.java # Main class
+│   │   ├── resources/
+│   │   │   ├── static/              # Tài nguyên tĩnh
+│   │   │   │   ├── css/
+│   │   │   │   │   └── style.css
+│   │   │   │   ├── js/
+│   │   │   │   │   ├── player-core.js     # Logic điều hướng nhạc
+│   │   │   │   │   ├── player-controls.js # Logic volume/seek
+│   │   │   │   │   └── ui-helper.js       # Các hàm hỗ trợ DOM/HTMX
+│   │   │   │   └── assets/                # Ảnh, icons
+│   │   │   └── webapp/WEB-INF/jsp/
+│   │   │       ├── index.jsp        # Layout chính (Head, Footer, Main container)
+│   │   │       ├── error.jsp        # Trang xử lý lỗi 404/500
+│   │   │       └── fragments/       # Các mảnh HTML cho HTMX
+│   │   │           ├── header.jsp
+│   │   │           ├── footer.jsp
+│   │   │           ├── player.jsp
+│   │   │           └── songs_table.jsp # Chỉ chứa <tbody> chứa các <tr>
+│   │   └── resources/application.properties
+├── pom.xml
+└── README.md
 
 ```
 
