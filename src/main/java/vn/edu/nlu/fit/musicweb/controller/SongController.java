@@ -1,79 +1,94 @@
 package vn.edu.nlu.fit.musicweb.controller;
 
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.stereotype.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
+
 import java.util.*;
-import org.springframework.ui.Model;
+import java.util.stream.Collectors;
 
 @Controller
+@RequestMapping("/api/songs")
 public class SongController {
 
-    @Autowired
-    private SongLyricsRepository songLyricsRepository;
+    @Autowired private SongRepository songRepository;
+    @Autowired private SongLyricsRepository songLyricsRepository;
 
-    @Autowired // tự động kết nối SongRepository vào controller
-    private SongRepository songRepository;
-
-    @GetMapping("/api/songs/{id}/lyrics")
-    @ResponseBody
-    public List<SongLyrics> getLyricsBySong(@PathVariable Long id) {
-        return songLyricsRepository.findBySongId(id);
-    }
-    @GetMapping("/song/lyrics/{id}")
-    public String showSongLyrics(@PathVariable Long id, Model model) {
-        // Lấy danh sách lời bài hát từ repository bằng id bài hát
-        List<SongLyrics> lyricsList = songLyricsRepository.findBySongId(id);
+    // ========================================================================
+    // 1. NHÓM NẠP BẢNG DỮ LIỆU (VIEW FRAGMENTS)
+    // ========================================================================
+    
+   @GetMapping("/all")
+    public String getAllSongs(Model model) {
+        List<Song> songs = songRepository.findAll();
         
-        // Nếu tìm thấy lời bài hát, lấy phần tử đầu tiên ra để hiển thị
-        if (lyricsList != null && !lyricsList.isEmpty()) {
-            model.addAttribute("lyrics", lyricsList.get(0));
-        } else {
-            model.addAttribute("lyrics", null);
-        }
+        // Debug: Kiểm tra xem DB có trả về dữ liệu không
+        System.out.println("DEBUG: Dữ liệu bài hát lấy từ DB: " + (songs == null ? "NULL" : songs.size() + " bản ghi"));
         
-        // Trả về file giao diện chứa lời bài hát  
-        return "fragments/lyric_display";
-    }
-
-    @GetMapping("/search")
-    public String searchSongs(@RequestParam(value = "q", required = false) String keyword, Model model) {
-        List<Song> searchResults;
-
-        // Kiểm tra nếu có từ khóa thì tìm theo title
-        if (keyword != null && !keyword.trim().isEmpty()) {
-
-            String cleanKeyword = keyword.trim();
-
-            // Tìm kiếm theo tên bài hát
-            List<Song> songsByTitle = songRepository.findByTitleContainingIgnoreCase(cleanKeyword);
-
-            // Tìm kiếm theo tên ca sĩ
-            List<Song> songsByArtist = songRepository.findByArtistContainingIgnoreCase(cleanKeyword);
-
-            // Bỏ danh sách bài hát vào Set trước để giữ thứ tự và tránh trùng
-            Set<Song> combinedResults = new LinkedHashSet<>(songsByTitle);
-
-            // Nạp danh sách ca sĩ vào Set   
-            combinedResults.addAll(songsByArtist);
-
-            // Chuyển kết quả thành danh sách List để hiển thị
-            searchResults = new ArrayList<>(combinedResults);
-        }
-        // Nếu không có từ khóa, trả về danh sách rỗng
-        else {
-            searchResults = new ArrayList<>();
-        }
-
-        // Đẩy danh sách bài hát
-        model.addAttribute("songs", searchResults);
-
-        // Đẩy ngược lại từ khóa để hiển thị trong ô tìm kiếm
-        model.addAttribute("keyword", keyword);
-
+        model.addAttribute("songs", songs);
         return "fragments/songs_table";
     }
 
+    // ========================================================================
+    // 2. NHÓM LỌC VÀ TÌM KIẾM
+    // ========================================================================
+
+    @GetMapping("/filter")
+    public String filterSongs(@RequestParam String type, @RequestParam String value, Model model) {
+        List<Song> songs = songRepository.findAll();
+        List<Song> filtered = songs.stream().filter(s -> {
+            if ("genre".equals(type)) return s.getGenre() != null && s.getGenre().equalsIgnoreCase(value);
+            if ("album".equals(type)) return s.getAlbumName() != null && s.getAlbumName().equalsIgnoreCase(value);
+            if ("artist".equals(type)) return s.getArtist() != null && s.getArtist().equalsIgnoreCase(value);
+            return false;
+        }).collect(Collectors.toList());
+
+        model.addAttribute("songs", filtered);
+        // Quan trọng: Trả về cùng path với trang chủ để HTMX render đúng
+        return "fragments/songs_table"; 
+    }
+
+    @GetMapping("/search")
+    public String searchSongs(@RequestParam(value = "q") String keyword, Model model) {
+        // Gọi trực tiếp hàm tìm kiếm đa trường
+        List<Song> result = songRepository.findByKeyword(keyword);
+        
+        model.addAttribute("songs", result);
+        model.addAttribute("keyword", keyword);
+        
+        // Trả về fragment để HTMX thay thế bảng
+        return "fragments/songs_table";
+    }
+
+    // ========================================================================
+    // 3. NHÓM API HỖ TRỢ (DROP-DOWNS & DATA)
+    // ========================================================================
+
+    @GetMapping("/categories/{type}")
+    @ResponseBody
+    public String getCategories(@PathVariable String type) {
+        List<String> list;
+        switch (type) {
+            case "genre":  list = songRepository.findDistinctGenres(); break;
+            case "album":  list = songRepository.findDistinctAlbums(); break;
+            case "artist": list = songRepository.findDistinctArtists(); break;
+            default:       list = Collections.emptyList();
+        }
+
+        return list.stream()
+            .map(item -> "<li><a class='dropdown-item' href='#' hx-get='/api/songs/filter?type=" + type + "&value=" + item + "' hx-target='#songListBody'>" + item + "</a></li>")
+            .collect(Collectors.joining());
+    }
+
+    @GetMapping("/lyrics/{id}")
+    @ResponseBody
+    public String getLyricsApi(@PathVariable Long id) {
+        return songLyricsRepository.findBySongId(id).stream()
+                .findFirst()
+                .map(SongLyrics::getContent)
+                .orElse("Chưa có lời bài hát.");
+    }
 }
