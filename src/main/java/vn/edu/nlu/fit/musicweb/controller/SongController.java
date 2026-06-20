@@ -22,6 +22,21 @@ public class SongController {
     public List<SongLyrics> getLyricsBySong(@PathVariable Long id) {
         return songLyricsRepository.findBySongId(id);
     }
+    @GetMapping("/song/lyrics/{id}")
+    public String showSongLyrics(@PathVariable Long id, Model model) {
+        // Lấy danh sách lời bài hát từ repository bằng id bài hát
+        List<SongLyrics> lyricsList = songLyricsRepository.findBySongId(id);
+        
+        // Nếu tìm thấy lời bài hát, lấy phần tử đầu tiên ra để hiển thị
+        if (lyricsList != null && !lyricsList.isEmpty()) {
+            model.addAttribute("lyrics", lyricsList.get(0));
+        } else {
+            model.addAttribute("lyrics", null);
+        }
+        
+        // Trả về file giao diện chứa lời bài hát  
+        return "fragments/lyric_display";
+    }
 
     @GetMapping("/search")
     public String searchSongs(@RequestParam(value = "q", required = false) String keyword, Model model) {
@@ -30,22 +45,21 @@ public class SongController {
         // Kiểm tra nếu có từ khóa thì tìm theo title
         if (keyword != null && !keyword.trim().isEmpty()) {
 
-            // 1. Cắt khoảng trắng thừa ở 2 đầu từ khóa
             String cleanKeyword = keyword.trim();
 
             // Tìm kiếm theo tên bài hát
             List<Song> songsByTitle = songRepository.findByTitleContainingIgnoreCase(cleanKeyword);
 
-            // 2. Tìm kiếm theo tên ca sĩ
+            // Tìm kiếm theo tên ca sĩ
             List<Song> songsByArtist = songRepository.findByArtistContainingIgnoreCase(cleanKeyword);
 
-            // 3. Bỏ danh sách bài hát vào Set trước để giữ thứ tự và tránh trùng
+            // Bỏ danh sách bài hát vào Set trước để giữ thứ tự và tránh trùng
             Set<Song> combinedResults = new LinkedHashSet<>(songsByTitle);
 
-            // 4. Nạp danh sách ca sĩ vào Set   
+            // Nạp danh sách ca sĩ vào Set   
             combinedResults.addAll(songsByArtist);
 
-            // 5. Chuyển kết quả thành danh sách List để hiển thị
+            // Chuyển kết quả thành danh sách List để hiển thị
             searchResults = new ArrayList<>(combinedResults);
         }
         // Nếu không có từ khóa, trả về danh sách rỗng
