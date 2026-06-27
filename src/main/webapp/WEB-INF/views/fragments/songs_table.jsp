@@ -12,35 +12,35 @@
         <td class="align-middle"><span class="badge bg-primary">${song.genre}</span></td>
         <td class="align-middle">${song.albumName}</td>
         <td class="align-middle">
-            <button class="btn btn-outline-primary btn-sm fw-bold me-1">
+            <button class="btn btn-outline-primary btn-sm fw-bold me-1" type="button"
+                    hx-post="/api/queue/add" 
+                    hx-vals='{"songId": "${song.id}"}' 
+                    hx-swap="none"
+                    hx-on::after-request="if(event.detail.successful){this.classList.remove('btn-outline-primary');this.classList.add('btn-success');this.innerHTML='✓ Đã thêm';this.disabled=true;let t=document.getElementById('queueToast');if(t&&window.bootstrap){bootstrap.Toast.getOrCreateInstance(t).show();}}else{alert('Lỗi gửi request lên Java!');}">
                 + Thêm
             </button>
 
-            <button class="btn btn-outline-primary btn-sm fw-bold" 
-                    type="button"
-                    hx-get="/api/lyrics/${song.id}"
-                    hx-target="#lyric-text-box-${song.id}"
-                    hx-swap="innerHTML"
-                    hx-on::before-request="
-                        document.querySelectorAll('[id^=\'lyric-row-\']').forEach(r => r.style.display = 'none');
-                        document.getElementById('lyric-row-${song.id}').style.display = 'table-row';
-                        document.getElementById('lyric-text-box-${song.id}').innerHTML = 'Đang nạp lời bài hát...';
-                    "
-                    hx-on::after-request="
-                        if(event.detail.successful) {
-                            let rawText = event.detail.xhr.responseText;
-                            let lines = rawText.split('\n');
-                            let cleanLyricsHTML = '';
-                            
-                            lines.forEach(line => {
-                                let cleanLine = line.replace(/\[\d{2}:\d{2}(\.\d{2})?\]/g, '').trim();
-                                if (cleanLine) {
-                                    cleanLyricsHTML += cleanLine + '<br>';
-                                }
-                            });
-                            document.getElementById('lyric-text-box-${song.id}').innerHTML = cleanLyricsHTML !== '' ? cleanLyricsHTML : 'Bài hát này hiện chưa có lời chi tiết.';
-                        }
-                    ">
+            <button class="btn btn-outline-primary btn-sm fw-bold" type="button"
+                hx-get="/api/lyrics/${song.id}" hx-target="#lyric-text-box-${song.id}" hx-swap="innerHTML"
+                hx-on::before-request="
+                    document.querySelectorAll('[id^=\'lyric-row-\']').forEach(r => r.style.display = 'none');
+                    document.getElementById('lyric-row-${song.id}').style.display = 'table-row';
+                    document.getElementById('lyric-text-box-${song.id}').innerHTML = 'Đang nạp lời bài hát...';
+                " hx-on::after-request="
+                    if(event.detail.successful) {
+                        let rawText = event.detail.xhr.responseText;
+                        let lines = rawText.split('\n');
+                        let cleanLyricsHTML = '';
+                        
+                        lines.forEach(line => {
+                            let cleanLine = line.replace(/\[\d{2}:\d{2}(\.\d{2})?\]/g, '').trim();
+                            if (cleanLine) {
+                                cleanLyricsHTML += cleanLine + '<br>';
+                            }
+                        });
+                        document.getElementById('lyric-text-box-${song.id}').innerHTML = cleanLyricsHTML !== '' ? cleanLyricsHTML : 'Bài hát này hiện chưa có lời chi tiết.';
+                    }
+                ">
                 Xem lời
             </button>
         </td>
@@ -48,15 +48,14 @@
 
     <tr id="lyric-row-${song.id}" style="display: none;">
         <td colspan="5" class="p-0 border-0">
-            <div class="p-4 text-center text-light border-start border-primary border-3 m-2 rounded" 
+            <div class="p-4 text-center text-light border-start border-primary border-3 m-2 rounded"
                  style="font-size: 0.95rem; line-height: 2rem; background-color: #15181c !important;">
-                
+
                 <div class="text-primary small fw-bold mb-3"> LỜI BÀI HÁT </div>
-                
+
                 <div id="lyric-text-box-${song.id}" class="mb-4"></div>
-                
-                <button class="btn btn-sm btn-secondary fw-bold px-4 py-1.5 mt-2" 
-                        type="button"
+
+                <button class="btn btn-sm btn-secondary fw-bold px-4 py-2 mt-2" type="button"
                         onclick="document.getElementById('lyric-row-${song.id}').style.display = 'none'">
                     Thu gọn ▲
                 </button>

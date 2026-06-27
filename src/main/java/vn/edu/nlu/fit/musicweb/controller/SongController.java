@@ -7,6 +7,7 @@ import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
 import java.util.*;
 import org.springframework.ui.Model;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class SongController {
@@ -74,6 +75,29 @@ public class SongController {
         model.addAttribute("keyword", keyword);
 
         return "fragments/songs_table";
+    }
+
+    @PostMapping("/api/queue/add")
+    @ResponseBody
+    public String addToQueue(@RequestParam("songId") Long songId, HttpSession session) {
+        // Lấy danh sách hàng đợi từ Session
+        List<Long> playQueue = (List<Long>) session.getAttribute("PLAY_QUEUE");
+        
+        // Nếu Session chưa có hàng đợi thì khởi tạo mới
+        if (playQueue == null) {
+            playQueue = new ArrayList<>();
+        }
+        
+        // Thêm bài hát vào danh sách 
+        if (!playQueue.contains(songId)) {
+            playQueue.add(songId);
+        }
+        
+        // Cập nhật lại danh sách vào Session
+        session.setAttribute("PLAY_QUEUE", playQueue);
+        
+        // Trả về một đoạn text ẩn hoặc script thông báo nhỏ cho HTMX 
+        return "<script>console.log('Đã thêm bài hát ID " + songId + " vào hàng đợi. Tổng số bài: " + playQueue.size() + "');</script>";
     }
 
 }
