@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class SongController {
     // 1. NHÓM NẠP BẢNG DỮ LIỆU (VIEW FRAGMENTS)
     // ========================================================================
     
-    @GetMapping("/all")
+   @GetMapping("/all")
     public String getAllSongs(Model model) {
         List<Song> songs = songRepository.findAll();
         
@@ -91,32 +90,5 @@ public class SongController {
                 .findFirst()
                 .map(SongLyrics::getContent)
                 .orElse("Chưa có lời bài hát.");
-    }
-
-    // ========================================================================
-    // 4. NHÓM QUẢN LÝ HÀNG ĐỢI (QUEUE MANAGEMENT)
-    // ========================================================================
-
-    @PostMapping("/api/queue/add")
-    @ResponseBody
-    public String addToQueue(@RequestParam("songId") Long songId, HttpSession session) {
-        // Lấy danh sách hàng đợi từ Session
-        List<Long> playQueue = (List<Long>) session.getAttribute("PLAY_QUEUE");
-        
-        // Nếu Session chưa có hàng đợi thì khởi tạo mới
-        if (playQueue == null) {
-            playQueue = new ArrayList<>();
-        }
-        
-        // Thêm bài hát vào danh sách 
-        if (!playQueue.contains(songId)) {
-            playQueue.add(songId);
-        }
-        
-        // Cập nhật lại danh sách vào Session
-        session.setAttribute("PLAY_QUEUE", playQueue);
-        
-        // Trả về một đoạn text ẩn hoặc script thông báo nhỏ cho HTMX 
-        return "<script>console.log('Đã thêm bài hát ID " + songId + " vào hàng đợi. Tổng số bài: " + playQueue.size() + "');</script>";
     }
 }
