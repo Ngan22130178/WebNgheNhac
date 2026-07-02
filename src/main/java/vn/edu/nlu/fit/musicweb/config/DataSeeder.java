@@ -1,12 +1,17 @@
 package vn.edu.nlu.fit.musicweb.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
 
 @Configuration
 public class DataSeeder {
+        
+    // Dữ liệu mẫu cho các bài hát và lời bài hát    
     @Bean
     CommandLineRunner initDatabase(SongRepository songRepo, SongLyricsRepository lyricsRepo) {
         return args -> {
@@ -77,6 +82,12 @@ public class DataSeeder {
             addSong(songRepo, lyricsRepo, "Bên Trên Tầng Lầu", "Tăng Duy Tân",
                     "/audio/bentrentanglau.mp3", "Nhạc Trẻ", "Single", "vi",
                     "/audio/bentrentanglau.lrc");
+            addSong(songRepo, lyricsRepo, "Ngã Lai", "Tôn Sách",
+                    "/audio/Ngã_Lai-Tôn_Sách.mp3", "Nhạc Trẻ", "Đại Hào Diên", 
+                    "chinese", "/audio/Ngã_Lai-Tôn_Sách.lrc");
+            addSong(songRepo, lyricsRepo, "Hoa Soi Sáng Nơi Đây", "Nguyệt Mộng",
+                   "/audio/Hoa_soi_sáng_nơi_đây-Nguyệt_Mộng.mp3", "Nhạc Trẻ", "Album Mới", 
+                   "vi", "/audio/Hoa_soi_sáng_nơi_đây-Nguyệt_Mộng.lrc");
         };
     }
 

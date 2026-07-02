@@ -1,71 +1,37 @@
-/* Đảm bảo menu nằm trên tất cả thành phần khác */
-.player-menu-panel {
+/* ==========================================================================
+   1. LAYOUT & POSITIONING (Cấu trúc khung và vị trí)
+   ========================================================================== */
+.player-menu-panel, .lyrics-panel {
     position: absolute;
-    bottom: 80px; 
+    bottom: 80px;
     right: 20px;
-    width: 300px;
     background-color: #212529;
     border: 1px solid #444;
-    border-radius: 8px;
-    color: white;
-    z-index: 1050;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-/* Định dạng chữ trắng cho lời bài hát */
-#modalLyricsContent {
-    color: #ffffff !important;
-    font-size: 1.1rem;
-}
-.lyrics-panel {
-    position: absolute;
-    bottom: 80px; /* Cách thanh player một khoảng */
-    right: 20px;
-    width: 350px;
-    height: 400px;
-    background-color: rgba(30, 30, 30, 0.95); /* Màu nền tối mờ */
-    border: 1px solid #444;
     border-radius: 10px;
-    color: white; /* Màu chữ trắng */
-    padding: 15px;
+    color: #fff;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    z-index: 1000;
+    z-index: 1050;
     overflow-y: auto;
 }
 
-.lyrics-content {
-    font-size: 16px;
-    line-height: 1.6;
-    text-align: center;
-    white-space: pre-line; /* Giữ định dạng xuống dòng */
-}
-
-.lyrics-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-weight: bold;
-    border-bottom: 1px solid #555;
-    padding-bottom: 5px;
-}
-/* Định dạng chung cho các popup menu dưới trình phát */
 .player-menu-panel {
-    position: absolute;
-    bottom: 80px; 
-    right: 20px;
     width: 320px;
     max-height: 350px;
-    background-color: #212529; /* Màu nền tối giống footer/player */
-    border: 1px solid #444;
-    border-radius: 8px;
-    color: #fff;
     padding: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 1050;
-    overflow-y: auto;
 }
 
-/* Định dạng riêng cho danh sách bài hát trong queue */
+.lyrics-panel {
+    width: 350px;
+    height: 400px;
+    padding: 15px;
+    background-color: rgba(30, 30, 30, 0.95);
+}
+
+/* ==========================================================================
+   2. COMPONENTS (Các thành phần con)
+   ========================================================================== */
+
+/* Danh sách phát (Queue) */
 .queue-item {
     padding: 8px;
     border-bottom: 1px solid #333;
@@ -76,11 +42,69 @@
     background-color: #343a40;
 }
 
-/* Định dạng riêng cho khung lời */
-.lyrics-display {
-    text-align: center;
+/* Lời bài hát (Lyrics) */
+.lyrics-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
+
+.lyrics-content, .lyrics-display {
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.6;
+    text-align: center;
     white-space: pre-wrap;
     color: #e0e0e0;
+}
+
+#modalLyricsContent {
+    color: #ffffff !important;
+    font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   3. INTERACTIVE ELEMENTS (Hiệu ứng & Thanh điều khiển)
+   ========================================================================== */
+
+/* Progress Bar */
+#progressBar {
+    accent-color: #0d6efd; 
+}
+
+#progressBar:hover::-webkit-slider-thumb {
+    transform: scale(1.2);
+    transition: 0.2s;
+}
+
+/* Equalizer Animation */
+.equalizer {
+    display: flex;
+    gap: 2px;
+    height: 12px;
+    align-items: flex-end;
+}
+
+.equalizer span {
+    width: 3px;
+    height: 100%;
+    background: white;
+    animation: bounce 0.6s infinite alternate;
+}
+
+.equalizer span:nth-child(2) { animation-delay: 0.2s; }
+.equalizer span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+    from { height: 30%; }
+    to { height: 100%; }
+}
+
+/* ==========================================================================
+   4. UTILITIES (Các tiện ích hỗ trợ)
+   ========================================================================== */
+.htmx-hidden {
+    display: none !important;
 }
