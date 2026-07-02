@@ -3,12 +3,13 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-     <!-- 1. NAVIGATION BAR CONTAINER  -->
-    
+<%-- ==========================================
+     1. NAVIGATION BAR CONTAINER 
+     ========================================== --%>
 <nav class="navbar navbar-expand-lg border-bottom shadow-sm bg-body-tertiary" id="mainNavbar">
     <div class="container">
         
-        <!-- <%-- Logo --%> -->
+        <%-- Logo --%>
         <a class="navbar-brand fw-bold" href="/" hx-get="/api/songs" hx-target="#songListBody">
             🎵 MusicWeb
         </a>
@@ -19,7 +20,7 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             
-            <!-- <%-- 2. MAIN NAVIGATION MENU --%> -->
+            <%-- 2. MAIN NAVIGATION MENU --%>
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="#" hx-get="/api/songs/all" hx-target="#songListBody">Tất cả</a>
@@ -35,7 +36,7 @@
                            hx-target="#${categories[i]}-menu" 
                            hx-trigger="mouseenter once"
                            hx-indicator="#globalIndicator">
-                            ${labels[i]}
+                           ${labels[i]}
                         </a>
                         <ul class="dropdown-menu" id="${categories[i]}-menu">
                             <li><a class="dropdown-item">Đang tải...</a></li>
@@ -44,10 +45,10 @@
                 </c:forEach>
             </ul>
 
-            <!-- <%-- 3. SEARCH & USER ACTIONS --%> -->
+            <%-- 3. SEARCH & USER ACTIONS --%>
             <div class="d-flex align-items-center">
                 
-                <!-- <%-- Live Search với Delay --%> -->
+                <%-- Live Search với Delay --%>
                 <form class="d-flex me-3" hx-get="/api/songs/search" hx-target="#songListBody">
                     <input class="form-control form-control-sm me-2" type="search" name="q" 
                            placeholder="Tìm kiếm..."
@@ -57,47 +58,41 @@
                            hx-indicator="#globalIndicator">
                 </form>
 
-                <!-- <%-- Loading Indicator (Ẩn mặc định) --%> -->
+                <%-- Loading Indicator (Ẩn mặc định) --%>
                 <span class="htmx-indicator spinner-border spinner-border-sm text-primary me-2" id="globalIndicator"></span>
                 
                 <button id="themeToggle" class="btn btn-outline-secondary btn-sm me-2" onclick="toggleTheme()">🌓</button>
 
-                <!-- <%-- Session Logic: Hiển thị User hoặc Nút Đăng nhập --%> -->
+                <%-- Session Logic: Hiển thị User hoặc Nút Đăng nhập --%>
                 <sec:authorize access="!isAuthenticated()">
                     <a href="/login" class="btn btn-primary btn-sm">Đăng nhập</a>
                 </sec:authorize>
 
                 <sec:authorize access="isAuthenticated()">
                     <div class="dropdown">
-                        <!-- <%-- Trích xuất đối tượng principal để kiểm tra loại tài khoản --%> -->
-                        <sec:authentication property="principal" var="principalObj" />
+                        <%-- Lấy fullName từ principal (đã cấu hình trong CustomUserDetails) --%>
+                        <sec:authentication property="principal.fullName" var="fullName" />
                         
-                        <c:choose>
-                            <!-- <%-- Nếu đối tượng chứa thuộc tính 'attributes', chứng tỏ đây là Google OAuth2 User --%> -->
-                            <c:when test="${not empty principalObj['attributes']}">
-                                <c:set var="fullName" value="${principalObj.attributes['name']}" />
-                            </c:when>
-                            <!-- <%-- Ngược lại, đây là tài khoản thường đăng nhập bằng form --%> -->
-                            <c:otherwise>
-                                <c:set var="fullName" value="${principalObj.fullName}" />
-                            </c:otherwise>
-                        </c:choose>
-                        
-                        <!-- <%-- Logic tạo avatar chữ cái dựa trên họ tên nhận diện được --%> -->
+                        <%-- Logic tạo avatar chữ cái --%>
                         <c:set var="nameParts" value="${fn:split(fullName, ' ')}" />
                         <c:set var="lastName" value="${nameParts[fn:length(nameParts)-1]}" />
                         <c:set var="firstChar" value="${fn:substring(lastName, 0, 1)}" />
+                        
+                        <%-- Màu sắc ngẫu nhiên dựa trên độ dài tên --%>
+                        <c:set var="colors" value='<%= new String[]{"#e57373", "#f06292", "#ba68c8", "#9575cd", "#7986cb", "#64b5f6", "#4fc3f7"} %>' />
+                        <c:set var="colorIndex" value="${fn:length(fullName) % 7}" />
 
-                        <!-- <%-- Thẻ hiển thị hình tròn Avatar với mã màu xanh cố định mượt mà sạch lỗi --%> -->
                         <button class="btn btn-sm p-0 rounded-circle border-0 dropdown-toggle" data-bs-toggle="dropdown">
-                            <div class="d-flex align-items-center justify-content-center rounded-circle avatar-hover" 
-                                 style="width: 32px; height: 32px; background-color: #007bff; color: white; font-weight: bold;">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle" 
+                                style="width: 32px; height: 32px; background-color: #007bff; color: white; font-weight: bold;">
                                 ${fn:toUpperCase(firstChar)}
                             </div>
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="px-3 py-1 fw-bold text-muted small">Xin chào, ${fullName}</li>
+                            <sec:authorize access="isAuthenticated()">
+                                <li class="px-3 py-1 fw-bold text-muted small">Xin chào, ${userDisplayName}</li>
+                            </sec:authorize>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/user">Tài khoản</a></li>
                             <li>
@@ -114,7 +109,9 @@
     </div>
 </nav>
 
-     <!-- 4. GLOBAL STYLES (HTMX Indicator) -->
+<%-- ==========================================
+     4. GLOBAL STYLES (HTMX Indicator)
+     ========================================== --%>
 <style>
     .htmx-indicator { opacity: 0; transition: opacity 200ms; }
     .htmx-request .htmx-indicator { opacity: 1; }
@@ -129,4 +126,6 @@
         opacity: 0.8;
         cursor: pointer;
     }
+    
+    /* ... (giữ nguyên style htmx-indicator cũ) ... */
 </style>
