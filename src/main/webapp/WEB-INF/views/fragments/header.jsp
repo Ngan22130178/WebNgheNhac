@@ -95,6 +95,10 @@
                             </sec:authorize>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/user">Tài khoản</a></li>
+
+                            <sec:authorize access="hasRole('ADMIN')">
+                                <li><a class="dropdown-item text-primary fw-bold" href="/admin">Quản lý</a></li>
+                            </sec:authorize>
                             <li>
                                 <form action="/logout" method="POST">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
