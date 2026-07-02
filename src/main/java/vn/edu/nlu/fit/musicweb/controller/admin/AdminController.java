@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.fit.musicweb.repository.SongRepository;
-import vn.edu.nlu.fit.musicweb.service.MusicScannerService;
+
 
 @Controller
 @RequestMapping("/admin") // Ánh xạ tới /admin
