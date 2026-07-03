@@ -89,20 +89,35 @@
                             </div>
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 200px;">
                             <sec:authorize access="isAuthenticated()">
-                                <li class="px-3 py-1 fw-bold text-muted small">Xin chào, ${userDisplayName}</li>
+                                <li class="px-3 py-2 fw-bold text-muted small border-bottom">
+                                    <i class="fa-solid fa-user-circle me-1"></i> ${userDisplayName}
+                                </li>
                             </sec:authorize>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/user">Tài khoản</a></li>
+
+                            <li>
+                                <a class="dropdown-item" href="/user">
+                                    <i class="fa-solid fa-user-gear me-2"></i> Tài khoản của tôi
+                                </a>
+                            </li>
 
                             <sec:authorize access="hasRole('ADMIN')">
-                                <li><a class="dropdown-item text-primary fw-bold" href="/admin">Quản lý</a></li>
+                                <li>
+                                    <a class="dropdown-item text-primary fw-bold" href="/admin">
+                                        <i class="fa-solid fa-shield-halved me-2"></i> Trang quản trị
+                                    </a>
+                                </li>
                             </sec:authorize>
+
+                            <li><hr class="dropdown-divider"></li>
+
                             <li>
-                                <form action="/logout" method="POST">
+                                <form action="/logout" method="POST" class="m-0">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                    <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i> Đăng xuất
+                                    </button>
                                 </form>
                             </li>
                         </ul>
