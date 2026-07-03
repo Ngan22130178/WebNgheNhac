@@ -1,23 +1,72 @@
 package vn.edu.nlu.fit.musicweb.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
-
+import java.util.List;
 @Configuration
 public class DataSeeder {
-        
+
     // Dữ liệu mẫu cho các bài hát và lời bài hát    
     @Bean
-    CommandLineRunner initDatabase(SongRepository songRepo, SongLyricsRepository lyricsRepo) {
+    CommandLineRunner initDatabase(SongRepository songRepo, SongLyricsRepository lyricsRepo, UserRepository userRepo, PasswordEncoder passwordEncoder) {
         return args -> {
-            songRepo.deleteAll();
-            lyricsRepo.deleteAll();
+                songRepo.deleteAll();
+                lyricsRepo.deleteAll();
+            // 1. Khởi tạo dữ liệu người dùng (User)
+            if (userRepo.count() == 0) {
+                // Khởi tạo User với mật khẩu đã mã hóa
+                List<User> users = List.of(
+                        
+                        User.builder()
+                        .email("admin@musicweb.com")
+                        .password(passwordEncoder.encode("admin123")) // Mã hóa ở đây
+                        .role("ADMIN")
+                        .fullName("Quản trị hệ thống")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("nguyenvana@gmail.com")
+                        .password(passwordEncoder.encode("user123")) // Mã hóa ở đây
+                        .role("USER")
+                        .fullName("Nguyễn Văn A")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("tranthib@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("USER")
+                        .fullName("Trần Thị B")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("lequangc@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("USER")
+                        .fullName("Lê Quang C")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("phamthid@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("USER")
+                        .fullName("Phạm Thị D")
+                        .enabled(false)
+                        .provider("LOCAL")
+                        .build()
+                );
+                userRepo.saveAll(users);
+                System.out.println("Đã khởi tạo thành công 5 người dùng!");
+            }    
 
+            // 2. Khởi tạo dữ liệu bài hát và lời bài hát
             addSong(songRepo, lyricsRepo, "Nhất Tư Bách Hài Bất Tự Do",
                     "Ca sĩ 1", "/audio/nhat_tu_bach_hai_bat_tu_do.mp3",
                     "Nhạc Trẻ", "Album Hè 2026", "vi",
@@ -302,4 +351,5 @@ public class DataSeeder {
                         "[00:05.00]Hệ thống đang cập nhật thêm lời cho bài hát " + title + ".";
         }
     }
+    
 }
