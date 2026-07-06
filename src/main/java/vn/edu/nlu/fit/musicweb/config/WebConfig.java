@@ -8,16 +8,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Ánh xạ audio
-        registry.addResourceHandler("/uploads/audio/**")
-                .addResourceLocations("file:D:/music_data/audio/");
-        
-        // Ánh xạ cover
-        registry.addResourceHandler("/uploads/cover/**")
-                .addResourceLocations("file:D:/music_data/cover/");
-        
-        // Ánh xạ lyric (Nếu bạn vẫn lưu file .lrc riêng biệt)
-        registry.addResourceHandler("/uploads/lyric/**")
-                .addResourceLocations("file:D:/music_data/lyric/");
+        // Ánh xạ URL /audio/** sang ổ đĩa vật lý D:/music-upload/audio/
+        registry.addResourceHandler("/audio/**")
+                .addResourceLocations("file:D:/music-upload/audio/");
+     
     }
 }

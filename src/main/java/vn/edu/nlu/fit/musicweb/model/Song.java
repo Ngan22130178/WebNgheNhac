@@ -1,11 +1,17 @@
 package vn.edu.nlu.fit.musicweb.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "songs")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +34,7 @@ public class Song {
     )
     private List<SongLyrics> lyricsList = new ArrayList<>();
 
-    public Song() {}
-
-    // Constructor chuẩn (không bao gồm id vì DB tự sinh)
+    @Builder
     public Song(String title, String artist, String url, String genre, String albumName) {
         this.title = title;
         this.artist = artist;

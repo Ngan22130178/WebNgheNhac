@@ -1,12 +1,13 @@
 package vn.edu.nlu.fit.musicweb.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.nlu.fit.musicweb.model.Song;
 import java.util.List;
-
+import jakarta.transaction.Transactional;
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long> { //JPARepository cung cấp các phương thức CRUD cơ bản, JpaSpecificationExecutor hỗ trợ tìm kiếm nâng cao
 
@@ -45,5 +46,8 @@ public interface SongRepository extends JpaRepository<Song, Long> { //JPAReposit
        "LOWER(s.genre) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Song> findByKeyword(@Param("keyword") String keyword);
 
-
+    @Modifying // Đánh dấu phương thức này là một thao tác thay đổi dữ liệu (INSERT, UPDATE, DELETE)
+    @Transactional // Transactional để đảm bảo rằng thao tác xóa được thực hiện trong một giao dịch
+    @Query("DELETE FROM Song s WHERE s.url = :url")
+    void deleteByUrl(@Param("url") String url);
 }

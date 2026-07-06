@@ -68,8 +68,9 @@
 </div>
 
 <%-- TOAST NOTIFICATION (Cần thêm vào nếu trang chưa có) --%>
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="liveToast" class="toast" role="alert">
-        <div class="toast-body" id="toastMessage">Thông báo...</div>
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1055; margin-top: 20px;">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="toastMessage" class="toast-body">
+            </div>
     </div>
 </div>
