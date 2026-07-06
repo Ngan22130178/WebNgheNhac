@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import vn.edu.nlu.fit.musicweb.repository.UserRepository;
 
 @Controller
-@RequestMapping("/admin/admin_manager_user")
-public class AdminManagerUser {
+@RequestMapping("/admin/managerUsers")
+public class UsersController {
 
     @Autowired
     private UserRepository userRepository;
@@ -21,6 +21,6 @@ public class AdminManagerUser {
         // Giúp menu trang quản lý người dùng được highlight (active)
         model.addAttribute("currentPage", "users"); 
         
-        return "admin/admin_manager_user"; // Tên file jsp của bạn (ví dụ: webapp/WEB-INF/views/admin/user_manager.jsp)
+        return "admin/managerUsers"; // webapp/WEB-INF/views/admin/managerUsers.jsp
     }
 }

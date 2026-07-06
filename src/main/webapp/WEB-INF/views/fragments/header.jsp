@@ -104,7 +104,7 @@
 
                             <sec:authorize access="hasRole('ADMIN')">
                                 <li>
-                                    <a class="dropdown-item text-primary fw-bold" href="/admin">
+                                    <a class="dropdown-item text-primary fw-bold" href="/admin/songs">
                                         <i class="fa-solid fa-shield-halved me-2"></i> Trang quản trị
                                     </a>
                                 </li>

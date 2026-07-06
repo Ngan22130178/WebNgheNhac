@@ -8,7 +8,7 @@ import vn.edu.nlu.fit.musicweb.model.Song;
 import java.util.List;
 
 @Repository
-public interface SongRepository extends JpaRepository<Song, Long> {
+public interface SongRepository extends JpaRepository<Song, Long> { //JPARepository cung cấp các phương thức CRUD cơ bản, JpaSpecificationExecutor hỗ trợ tìm kiếm nâng cao
 
     // ========================================================================
     // 1. NHÓM TÌM KIẾM DỮ LIỆU (Search)
@@ -44,5 +44,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
        "LOWER(s.albumName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
        "LOWER(s.genre) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Song> findByKeyword(@Param("keyword") String keyword);
+
 
 }

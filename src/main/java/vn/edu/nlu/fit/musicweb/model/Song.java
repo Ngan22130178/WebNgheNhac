@@ -20,7 +20,12 @@ public class Song {
     private String albumName; 
 
     // Quan hệ 1-N: Lưu danh sách lời bài hát
-    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(
+    mappedBy = "song", 
+    cascade = CascadeType.ALL, // Khi lưu/xóa bài hát, tự động xóa tất cả lời bài hát liên quan
+    fetch = FetchType.LAZY, // Tải lời bài hát khi cần, không tải ngay khi lấy bài hát
+    orphanRemoval = true // Khi xóa lời bài hát khỏi danh sách lyricsList, tự động xóa bản ghi trong DB nếu không còn tham chiếu nào đến nó
+    )
     private List<SongLyrics> lyricsList = new ArrayList<>();
 
     public Song() {}
@@ -55,9 +60,14 @@ public class Song {
     public List<SongLyrics> getLyricsList() { return lyricsList; }
     public void setLyricsList(List<SongLyrics> lyricsList) { this.lyricsList = lyricsList; }
     
-    // Helper method để thêm lời vào bài hát (giúp đồng bộ 2 chiều)
+    // Thêm và xóa lời bài hát từ danh sách lyricsList, đồng thời cập nhật quan hệ 2 chiều
     public void addLyrics(SongLyrics lyrics) {
-        lyricsList.add(lyrics);
+        this.lyricsList.add(lyrics);
         lyrics.setSong(this);
+    }
+
+    public void removeLyrics(SongLyrics lyric) {
+    lyricsList.remove(lyric);
+    lyric.setSong(null);
     }
 }

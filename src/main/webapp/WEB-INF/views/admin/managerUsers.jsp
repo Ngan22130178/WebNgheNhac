@@ -103,14 +103,14 @@ main {
 
 <div class="d-flex">
     <aside class="sidebar p-3 d-flex flex-column">
-        <a href="javascript:history.back()" class="text-white text-decoration-none mb-4 d-flex align-items-center">
+        <a href="${pageContext.request.contextPath}/" class="text-white text-decoration-none mb-4 d-flex align-items-center">
             <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
         </a>
         <nav class="nav flex-column justify-content-center flex-grow-1">
-            <a class="nav-link ${page == 'songs' ? 'active' : ''}" href="/admin">
+            <a class="nav-link ${page == 'songs' ? 'active' : ''}" href="/admin/songs">
                 <i class="fa-solid fa-music me-2"></i> Quản lý bài hát
             </a>
-            <a class="nav-link ${page == 'users' ? 'active' : ''}" href="/admin/admin_manager_user">
+            <a class="nav-link ${page == 'users' ? 'active' : ''}" href="/admin/managerUsers">
                 <i class="fa-solid fa-user me-2"></i> Quản lý người dùng
             </a>
             <a class="nav-link ${page == 'genres' ? 'active' : ''}" href="/admin/genres">

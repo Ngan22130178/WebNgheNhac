@@ -1,7 +1,10 @@
 package vn.edu.nlu.fit.musicweb.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.edu.nlu.fit.musicweb.model.LyricLine;
+import vn.edu.nlu.fit.musicweb.model.Song;
+import vn.edu.nlu.fit.musicweb.repository.SongRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,6 +14,38 @@ import java.util.regex.Pattern;
 
 @Service
 public class SongService {
+    
+    @Autowired
+    private SongRepository songRepository;
+
+    // READ: Xem tất cả
+    public List<Song> getAllSongs() { return songRepository.findAll(); }
+    
+    // READ: Xem theo ID
+    public Song getSongById(Long id) { return songRepository.findById(id).orElse(null); }
+
+    // CREATE / UPDATE: Lưu (Spring Data JPA tự hiểu nếu có ID là Update, không có ID là Create)
+    public void saveSong(Song song) { songRepository.save(song); }
+
+    // DELETE: Xóa
+    public void deleteSong(Long id) { songRepository.deleteById(id); }
+
+    // UPDATE: Cập nhật bài hát theo ID (sửa đổi các trường dữ liệu)
+    public void updateSong(Long id, Song updatedSong) {
+        // 1. Tìm song cũ từ DB bằng ID
+        Song existingSong = songRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy bài hát với ID: " + id));
+
+        // 2. Cập nhật các trường cơ bản
+        existingSong.setTitle(updatedSong.getTitle());
+        existingSong.setArtist(updatedSong.getArtist());
+        existingSong.setUrl(updatedSong.getUrl());
+        existingSong.setGenre(updatedSong.getGenre());
+        existingSong.setAlbumName(updatedSong.getAlbumName());
+
+        // 3. Lưu lại (đã có ID nên JPA sẽ thực hiện UPDATE)
+        songRepository.save(existingSong);
+    }
 
     // Regex cải tiến: Bắt từng tag thời gian, hỗ trợ các dòng có nhiều tag
     private static final Pattern TIME_PATTERN = Pattern.compile("\\[(\\d{2}):(\\d{2})[\\.:](\\d{2,3})\\]");

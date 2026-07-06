@@ -15,6 +15,8 @@
 let queue = [];
 let currentIndex = -1;
 let loopMode = 0; // 0: Off, 1: Loop 1, 2: Loop All, 3: Shuffle
+let isShuffled = false; // Biến trạng thái
+
 const player = document.getElementById('mainPlayer');
 
 // Khởi tạo trạng thái giao diện khi trang vừa tải xong
@@ -188,18 +190,46 @@ function handleLoopAll() {
 }
 
 // Mode 3: Phát ngẫu nhiên, nhưng không lặp lại bài đang phát nếu có nhiều hơn 1 bài
+//function handleShuffle() {
+//    if (queue.length <= 1) return;
+//
+//    shuffle(queue);
+
+    // Chọn ngẫu nhiên một index thay vì mặc định là 0
+//    currentIndex = Math.floor(Math.random() * queue.length);
+    
+//    if (typeof updateQueueMenu === 'function') updateQueueMenu();
+//    executePlay();
+    
+//    showToast("Đã xáo trộn danh sách!");
+//}
+/**
+ * Trộn danh sách bài hát:
+ * 1. Giữ bài hiện tại làm đầu danh sách (index 0).
+ * 2. Lấy tất cả bài hát còn lại xáo trộn ngẫu nhiên.
+ * 3. Cập nhật lại biến queue.
+ */
 function handleShuffle() {
     if (queue.length <= 1) return;
 
-    shuffle(queue);
-
-    // Chọn ngẫu nhiên một index thay vì mặc định là 0
-    currentIndex = Math.floor(Math.random() * queue.length);
+    // 1. Lấy bài hát đang phát (nếu có)
+    const currentSong = queue[currentIndex];
     
-    if (typeof updateQueueMenu === 'function') updateQueueMenu();
-    executePlay();
+    // 2. Lấy danh sách các bài hát còn lại
+    let otherSongs = queue.filter((_, index) => index !== currentIndex);
     
-    showToast("Đã xáo trộn danh sách!");
+    // 3. Xáo trộn danh sách còn lại (Thuật toán Fisher-Yates)
+    for (let i = otherSongs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [otherSongs[i], otherSongs[j]] = [otherSongs[j], otherSongs[i]];
+    }
+    
+    // 4. Tạo queue mới: bài hiện tại + danh sách đã trộn
+    queue = [currentSong, ...otherSongs];
+    currentIndex = 0; // Đặt lại index về 0 vì bài hiện tại giờ là bài đầu tiên
+    updateQueueMenu();
+    console.log("Danh sách đã được trộn!");
+    // Có thể gọi thêm hàm cập nhật UI hiển thị queue tại đây nếu cần
 }
 
 // ==========================================
@@ -302,3 +332,4 @@ function updateMediaSession() {
         });
     }
 }
+
