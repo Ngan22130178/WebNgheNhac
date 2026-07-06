@@ -20,31 +20,41 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
-        // 1. Lấy thông tin thô từ Google
         OAuth2User oAuth2User = super.loadUser(userRequest);
         
         String email = oAuth2User.getAttribute("email");
+        String googleId = oAuth2User.getAttribute("sub"); // Lấy ID của Google
         
-        // 2. Logic tìm/tạo user trong DB (giống code cũ)
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
-            User newUser = User.builder()
-                    .email(email)
-                    .fullName(oAuth2User.getAttribute("name"))
-                    .role("ROLE_USER") // Gán role từ DB
-                    .provider("GOOGLE")
-                    .build();
-            return userRepository.save(newUser);
+        // 1. Tìm user theo googleId trước
+        User user = userRepository.findByGoogleId(googleId).orElseGet(() -> {
+            // 2. Nếu không có googleId, tìm theo email để liên kết
+            return userRepository.findByEmail(email).map(existingUser -> {
+                // Liên kết GoogleId vào tài khoản email đã có
+                existingUser.setGoogleId(googleId);
+                existingUser.setProvider("GOOGLE");
+                return userRepository.save(existingUser);
+            }).orElseGet(() -> {
+                // 3. Nếu chưa có, tạo mới hoàn toàn
+                User newUser = User.builder()
+                        .email(email)
+                        .fullName(oAuth2User.getAttribute("name"))
+                        .avatarUrl(oAuth2User.getAttribute("picture"))
+                        .googleId(googleId)
+                        .provider("GOOGLE")
+                        .role("ROLE_USER")
+                        .build();
+                return userRepository.save(newUser);
+            });
         });
 
-        // 3. ĐÂY LÀ CHỖ QUAN TRỌNG: 
-        // Tạo Authorities từ role trong DB để Spring Security hiểu được quyền
+        // Tạo Authorities
         var authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
 
-        // 4. Trả về DefaultOAuth2User đã được "nâng cấp" với Authorities
+        // Trả về đối tượng OAuth2User đã được định danh chính xác
         return new DefaultOAuth2User(
-            authorities,              // Danh sách quyền (ROLE_USER)
-            oAuth2User.getAttributes(), // Toàn bộ data từ Google
-            "email"                   // Attribute dùng làm key định danh
+            authorities,
+            oAuth2User.getAttributes(),
+            "email"
         );
     }
 }
