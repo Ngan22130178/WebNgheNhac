@@ -8,14 +8,13 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import vn.edu.nlu.fit.musicweb.service.CustomOAuth2UserService;
 import vn.edu.nlu.fit.musicweb.service.CustomUserDetailsService;
-import org.springframework.security.web.authentication.*;
 
 @Configuration
 @EnableWebSecurity
@@ -56,6 +55,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+            )
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
                 // 1. Cho phép tất cả mọi người (kể cả khách) truy cập các trang công cộng
@@ -74,15 +76,15 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
+                .loginProcessingUrl("/login")
                 .usernameParameter("email") // Trùng với name="email" trong input JSP
                 .passwordParameter("password")
                 .defaultSuccessUrl("/", true)
                 .permitAll()
             )
             .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .userInfoEndpoint(info -> info.userService(customOAuth2UserService))
-                .defaultSuccessUrl("/", true)
+                .userInfoEndpoint(info -> info.userService(customOAuth2UserService)) // KẾT NỐI SERVICE CỦA BẠN
+                .defaultSuccessUrl("/", true) // Trang chuyển hướng sau khi login thành công
             );
         return http.build();
     }
