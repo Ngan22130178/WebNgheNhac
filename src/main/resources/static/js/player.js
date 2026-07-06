@@ -261,7 +261,9 @@ function showToast(message) {
     const toastEl = document.getElementById('liveToast');
     const toastBody = document.getElementById('toastMessage');
     toastBody.innerText = message;
-    new bootstrap.Toast(toastEl).show();
+    // Khởi tạo và hiển thị toast
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
 }
 
 function setVolume(val) { player.volume = val; }

@@ -130,23 +130,23 @@ main {
         </div>
         <div class="admin-container p-4 d-flex flex-column align-items-center">
             <h2 class="mb-4 text-center">Công cụ quản lý bài hát</h2>
-        <div class="card p-4 shadow-sm border-0 mx-auto" style="max-width: 500px; width: 100%; background-color: var(--card-bg);">
-            <h5 class="mb-3" style="color: var(--text-main);">Chọn tệp nhạc để tải lên hệ thống:</h5>
-    
-            <form action="/admin/upload" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                
-                <div class="mb-3">
-                    <input type="file" name="file" class="form-control" id="fileInput" multiple required 
-                        style="background-color: var(--card-bg); color: var(--text-main); border-color: var(--border-color);">
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fa-solid fa-cloud-arrow-up me-2"></i>Tải lên (Upload)
-                </button>
-            </form>
+            <div class="card p-4 shadow-sm border-0 mx-auto" style="max-width: 500px; width: 100%; background-color: var(--card-bg);">
+                <h5 class="mb-3" style="color: var(--text-main);">Chọn tệp nhạc để tải lên hệ thống:</h5>
+        
+                <form action="/admin/songs/upload" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    
+                    <div class="mb-3">
+                        <input type="file" name="file" class="form-control" id="fileInput" multiple required 
+                            style="background-color: var(--card-bg); color: var(--text-main); border-color: var(--border-color);">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-cloud-arrow-up me-2"></i>Tải lên (Upload)
+                    </button>
+                </form>
+            </div>
         </div>
-</div>
 
             <div class="mt-5">
                 <h4>Danh sách bài hát</h4>
