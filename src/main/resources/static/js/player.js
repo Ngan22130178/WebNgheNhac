@@ -14,6 +14,7 @@
 // ==========================================
 let queue = [];
 let currentIndex = -1;
+let allSongs = []; // Nơi lưu trữ toàn bộ danh sách nhạc của hệ thống
 let loopMode = 0; // 0: Off, 1: Loop 1, 2: Loop All, 3: Shuffle
 let isShuffled = false; // Biến trạng thái
 
@@ -256,6 +257,53 @@ function addToQueue(url, title) {
         showToast("Bài hát đã có trong hàng đợi!");
     }
 }
+/**
+ * Thêm tất cả bài hát từ nguồn dữ liệu tổng vào queue
+ * Giả sử bạn có biến 'allSongs' chứa danh sách toàn bộ bài hát từ server
+ */
+function addAllToQueue() {
+    // Nếu bạn đã có danh sách toàn bộ bài hát (ví dụ: allSongs)
+    // Nếu chưa có, bạn nên fetch từ API trước khi gọi hàm này
+    
+    let addedCount = 0;
+    
+    allSongs.forEach(song => {
+        // Kiểm tra xem bài hát đã có trong hàng đợi chưa để tránh trùng lặp
+        if (!queue.some(q => q.url === song.url)) {
+            queue.push({
+                url: song.url,
+                title: song.title,
+                artist: song.artist || 'Unknown'
+            });
+            addedCount++;
+        }
+    });
+
+    if (addedCount > 0) {
+        updateQueueMenu();
+        showToast("Đã thêm " + addedCount + " bài hát vào hàng đợi!");
+    } else {
+        showToast("Tất cả bài hát đã có trong hàng đợi rồi!");
+    }
+}
+// Hàm này gọi đến Controller của bạn để lấy danh sách nhạc
+async function loadAllSongs() {
+    try {
+        const response = await fetch('/api/songs/all'); // Thay URL này bằng mapping Controller của bạn
+        if (response.ok) {
+            allSongs = await response.json(); // Gán dữ liệu vào biến toàn cục
+            console.log("Đã tải xong toàn bộ danh sách nhạc:", allSongs);
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải danh sách nhạc:", error);
+    }
+}
+
+// Gọi hàm này khi trang web tải xong
+document.addEventListener("DOMContentLoaded", () => {
+    loadAllSongs();
+    // ... các khởi tạo khác ...
+});
 // Hàm hiển thị thông báo (Toast) cho người dùng không cần bấm xác nhận, tự động ẩn sau vài giây
 function showToast(message) {
     const toastEl = document.getElementById('liveToast');
@@ -280,19 +328,25 @@ function updatePlayPauseUI(isPlaying) {
 
 player.ontimeupdate = () => {
     const progressBar = document.getElementById('progressBar');
-    const currentTimeSpan = document.getElementById('currentTime'); // Số bên trái
-    const durationSpan = document.getElementById('duration');       // Số bên phải
+    const currentTimeSpan = document.getElementById('currentTime'); 
+    const durationSpan = document.getElementById('duration');       
 
     if (player.duration) {
-        // 1. Cập nhật thanh tiến trình
-        progressBar.value = (player.currentTime / player.duration) * 100;
+        // Tính toán phần trăm hoàn thành
+        const percent = (player.currentTime / player.duration) * 100;
         
-        // 2. Cập nhật thời gian đã phát (bên trái)
+        // 1. Cập nhật giá trị thanh trượt
+        progressBar.value = percent;
+        
+        // 2. CẬP NHẬT BIẾN CSS ĐỂ TÔ MÀU (Quan trọng)
+        progressBar.style.setProperty('--progress', percent + '%');
+        
+        // 3. Cập nhật thời gian đã phát (bên trái)
         currentTimeSpan.innerText = formatTime(player.currentTime);
         
-        // 3. Cập nhật thời gian còn lại (bên phải)
+        // 4. Cập nhật thời gian còn lại (bên phải)
         const timeLeft = player.duration - player.currentTime;
-        durationSpan.innerText = "-"+ formatTime(timeLeft);
+        durationSpan.innerText = "-" + formatTime(timeLeft);
     }
 };
 // Hàm định dạng thời gian (phút:giây)

@@ -1,6 +1,36 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<style>
+    /* Tùy chỉnh thanh range */
+input[type=range].form-range {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
 
+/* Track: Phần nền (màu xanh nhạt) */
+input[type=range].form-range::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: #cce5ff; /* Xanh nhạt cho phần chưa phát */
+    /* Đây là nơi chúng ta sẽ vẽ phần xanh đậm đè lên */
+    background-image: linear-gradient(#007bff, #007bff); 
+    background-repeat: no-repeat;
+    background-size: var(--progress, 0%) 100%; /* Cập nhật biến này bằng JS */
+}
+
+/* Thumb: Nút tròn di chuyển */
+input[type=range].form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #007bff; /* Màu xanh đậm cho nút */
+    cursor: pointer;
+    margin-top: -5px; /* Căn giữa track */
+}
+</style>
 <%-- ==========================================
      1. MAIN PLAYER CONTAINER (Fixed Bottom)
      ========================================== --%>
@@ -38,6 +68,9 @@
             <button id="loopBtn" class="btn btn-sm btn-outline-secondary" onclick="toggleLoopMode()" title="Chế độ phát">⊘</button>
             <button id="lyricsBtn" class="btn btn-sm btn-outline-secondary" onclick="toggleLyrics()" title="Lời bài hát">Lời</button>
             <div class="dropup">
+                <button class="btn btn-sm btn-outline-secondary" onclick="addAllToQueue()" title="Thêm tất cả vào danh sách">
+                    ++
+                </button>
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">☰</button>
                 <ul class="dropdown-menu dropdown-menu-end p-0" style="max-height: 300px; overflow-y: auto; width: 250px;">
                     <div id="queueDropdownList" class="p-2"></div>

@@ -36,30 +36,36 @@ public class MusicScannerService {
             }
         }
 
-        // 2. Thêm các file mới trên ổ D vào DB
+        // 2. Thêm các file mới trên ổ D:/music-upload/audio/ vào DB
         List<String> existingUrls = songRepository.findAll().stream()
                                                 .map(Song::getUrl).toList();
 
         for (File file : files) {
-            String fileName = file.getName(); // Ví dụ: 1783348989238_Ánh Nắng Của Anh - Ca Sĩ A.mp3
+            String fileName = file.getName(); 
             String fileUrl = "/audio/" + fileName;
 
             if (!existingUrls.contains(fileUrl)) {
                 // --- XỬ LÝ TÁCH TÊN BÀI HÁT VÀ NGHỆ SĨ ---
                 
-                // 1. Bỏ timestamp: lấy chuỗi sau dấu "_"
-                String nameWithoutTimestamp = fileName.contains("_") ? 
-                                            fileName.substring(fileName.indexOf("_") + 1) : fileName;
+                // Cải tiến: Nếu file có chứa "_", chỉ cắt bỏ phần timestamp ở đầu. 
+                // Nếu không có "_" (hoặc "_" nằm ở vị trí khác), coi như tên file sạch.
+                String nameWithoutTimestamp = fileName;
+                if (fileName.contains("_")) {
+                    // Kiểm tra xem "_" có nằm ở vị trí hợp lý không (giả sử timestamp là các chữ số)
+                    String prefix = fileName.substring(0, fileName.indexOf("_"));
+                    if (prefix.matches("\\d+")) { // Nếu phần đầu là các chữ số
+                        nameWithoutTimestamp = fileName.substring(fileName.indexOf("_") + 1);
+                    }
+                }
                 
-                // 2. Bỏ đuôi file: lấy chuỗi trước dấu "." cuối cùng
+                // Bỏ đuôi file: lấy chuỗi trước dấu "." cuối cùng
                 int lastDotIndex = nameWithoutTimestamp.lastIndexOf(".");
                 String nameOnly = (lastDotIndex != -1) ? nameWithoutTimestamp.substring(0, lastDotIndex) : nameWithoutTimestamp;
 
                 String title = nameOnly;
-                String artist = "Unknown"; // Mặc định
+                String artist = "Unknown";
 
-                // 3. Tách Title - Artist dựa trên dấu "-"
-                // Dùng indexOf để tìm dấu gạch ngang đầu tiên
+                // Tách Title - Artist dựa trên dấu "-"
                 int dashIndex = nameOnly.indexOf("-");
                 if (dashIndex != -1) {
                     title = nameOnly.substring(0, dashIndex).trim();
@@ -69,7 +75,7 @@ public class MusicScannerService {
                 // --- LƯU VÀO DATABASE ---
                 Song newSong = Song.builder()
                         .title(title)
-                        .artist(artist) // Đảm bảo Entity Song của bạn có trường artist
+                        .artist(artist)
                         .url(fileUrl)
                         .build();
                 
