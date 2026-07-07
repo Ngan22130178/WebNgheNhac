@@ -6,14 +6,13 @@ import vn.edu.nlu.fit.musicweb.model.User;
 
 import java.util.List;
 import java.util.Optional;
-
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     
     // Tìm kiếm cơ bản
     Optional<User> findByEmail(String email);
     Optional<User> findByGoogleId(String googleId);
-    
+    Optional<User> findById(Long id);
     // Các phương thức hỗ trợ cho Admin:
     
     // Tìm tất cả người dùng theo vai trò (VD: tìm danh sách User thường)

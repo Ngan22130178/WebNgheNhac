@@ -4,13 +4,12 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>MusicWeb Admin - Quản lý người dùng</title>
+    <title>MusicWeb Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
- 
 </head>
 <body>
-<style>
+<style>/* --- BIẾN MÀU SẮC (CSS VARIABLES) --- */
 :root {
     /* Chế độ Sáng (Light Mode) */
     --bg-body: #F8F9FA;
@@ -100,23 +99,23 @@ main {
     border-radius: 10px !important;
 }
 </style>
-
 <div class="d-flex">
     <aside class="sidebar p-3 d-flex flex-column">
         <a href="${pageContext.request.contextPath}/" class="text-white text-decoration-none mb-4 d-flex align-items-center">
             <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
         </a>
+
         <nav class="nav flex-column justify-content-center flex-grow-1">
-            <a class="nav-link ${page == 'songs' ? 'active' : ''}" href="/admin/songs">
+            <a class="nav-link ${currentPage == 'songs' ? 'active' : ''}" href="/admin/songs">
                 <i class="fa-solid fa-music me-2"></i> Quản lý bài hát
             </a>
-            <a class="nav-link ${page == 'users' ? 'active' : ''}" href="/admin/managerUsers">
+            <a class="nav-link ${currentPage == 'users' ? 'active' : ''}" href="/admin/managerUsers">
                 <i class="fa-solid fa-user me-2"></i> Quản lý người dùng
             </a>
-            <a class="nav-link ${page == 'genres' ? 'active' : ''}" href="/admin/genres">
+            <a class="nav-link ${currentPage == 'genres' ? 'active' : ''}" href="/admin/genres">
                 <i class="fa-solid fa-list me-2"></i> Thể loại
             </a>
-            <a class="nav-link ${page == 'settings' ? 'active' : ''}" href="/admin/settings">
+            <a class="nav-link ${currentPage == 'settings' ? 'active' : ''}" href="/admin/settings">
                 <i class="fa-solid fa-gear me-2"></i> Cài đặt
             </a>
         </nav>
@@ -124,62 +123,171 @@ main {
 
     <main class="flex-grow-1 p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3>Quản lý người dùng</h3>
+            <h3>Quản lí người dùng</h3>
             <button id="theme-toggle" class="btn btn-outline-secondary rounded-pill">
                 <i class="fa-solid fa-circle-half-stroke"></i> Đổi chế độ
             </button>
         </div>
-
-
-        <div>
-            <h4>Danh sách người dùng</h4>
-            <table class="table table-hover mt-3" id="userTable">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Họ và tên</th> <th>Email</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${not empty users}">
-                            <c:forEach var="user" items="${users}">
+        <div class="admin-container p-4 d-flex flex-column align-items-center">
+                <h4>Danh sách người dùng</h4>
+                <table class="table table-hover mt-3" id="songTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Email</th>
+                            <th>Trạng thái</th>
+                            <th>Vai trò</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%-- Logic hiển thị dữ liệu từ Controller --%>
+                        <c:choose>
+                            <c:when test="${not empty users}">
+                                <c:forEach var="user" items="${users}">
+                                    <tr id="row-user-${user.id}">
+                                        <td>${user.id}</td>
+                                        <td>${user.fullName}</td>
+                                        <td>${user.email}</td>
+                                        <td>${user.enabled ? 'Hoạt động' : 'Không hoạt động'}</td>
+                                        <td>${user.role}</td>
+                                        <td>
+                                           <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" data-bs-target="#editUserModal${user.id}">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>                                     
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmDelete('${user.id}', '${user.fullName}')">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                            
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:forEach var="user" items="${users}">
+                                    <c:set var="user" value="${user}" scope="request" />
+                                    <jsp:include page="editUserModal.jsp" />
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
                                 <tr>
-                                    <td>${user.id}</td>
-                                    <td>${user.fullName}</td> <td>${user.email}</td>
-                                    <td>
-                                        <span class="badge ${user.enabled ? 'bg-success' : 'bg-danger'}">
-                                            ${user.enabled ? 'ĐANG HOẠT ĐỘNG' : 'KHÔNG HOẠT ĐỘNG'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
+                                    <td colspan="4" class="text-center">Chưa có người dùng nào.</td>
                                 </tr>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <tr>
-                                <td colspan="5" class="text-center">Chưa có người dùng nào.</td>
-                            </tr>
-                        </c:otherwise>
-                    </c:choose>
-                </tbody>
-            </table>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 </div>
-
+<div id="toastNotification" style="
+    position: fixed; 
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%); /* Căn giữa hoàn hảo */
+    padding: 15px 30px; 
+    background-color: #28a745; 
+    color: white; 
+    border-radius: 50px; /* Bo tròn góc kiểu hiện đại */
+    display: none; 
+    z-index: 9999; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+    Cập nhật thành công!
+</div>
 <script>
     document.getElementById('theme-toggle').addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
-        const thead = document.querySelector('#userTable thead');
+        
+        // Chuyển đổi màu bảng giữa table-light và table-dark
+        const thead = document.querySelector('#songTable thead');
         thead.classList.toggle('table-light');
         thead.classList.toggle('table-dark');
     });
-</script>
+
+    function confirmDelete(id, title) {
+        // Không cần dùng confirm() nếu bạn muốn xóa ngay lập tức
+        // Nếu vẫn muốn xác nhận, bạn có thể giữ lại if(confirm(...))
+        
+        fetch('/admin/managerUsers/delete/' + id, {
+            method: 'POST',
+        })
+        .then(response => {
+            if (response.ok) {
+                // 1. Xóa dòng tương ứng khỏi bảng HTML
+                const row = document.getElementById('row-user-' + id);
+                if (row) {
+                    row.remove();
+                }
+                
+                // 2. Hiện thông báo cho người dùng
+                alert('Đã xóa người dùng: ' + title);
+            } else {
+                alert('Có lỗi xảy ra!');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+function submitEditForm(event, formElement) {
+    event.preventDefault(); 
+    
+    const formData = new FormData(formElement);
+    const id = formData.get('id');
+
+    fetch('/admin/managerUsers/save/' + id, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data === "success") {
+            // Hiển thị thông báo thay vì alert
+            showToast("Cập nhật thành công!");
+            
+            updateRowInTable(id, formData);
+            const modalEl = document.getElementById('editUserModal' + id);
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+        } else {
+            showToast("Có lỗi xảy ra!", "#dc3545"); // Màu đỏ cho lỗi
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+    // Hàm hiển thị thông báo
+    function showToast(message, color = "#28a745") {
+        const toast = document.getElementById('toastNotification');
+        toast.innerText = message;
+        toast.style.backgroundColor = color;
+        toast.style.display = 'block';
+
+        // Tự động ẩn sau 2.5 giây
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2500);
+    }
+    function updateRowInTable(id, formData) {
+        // 1. Tìm thẻ <tr> có id="row-user-${user.id}"
+        const row = document.getElementById('row-user-' + id);
+        
+        if (row) {
+            // 2. Cập nhật các cột dựa trên chỉ số (cells[0] là cột đầu tiên)
+            // Hãy điều chỉnh chỉ số [x] cho khớp với bảng của bạn
+            row.cells[1].innerText = formData.get('fullName');    // Cột Tên người dùng
+            row.cells[2].innerText = formData.get('email');
+            row.cells[3].innerText = formData.get('enabled') === 'true' ? 'Hoạt động' : 'Không hoạt động';    // Cột Trạng thái
+            row.cells[4].innerText = formData.get('role');   
+                 // Cột Role
+
+            // Tạo hiệu ứng nhấp nháy nhẹ để người dùng biết dòng đó vừa được sửa
+            row.style.backgroundColor = "#fff3cd"; // Màu vàng nhạt
+            setTimeout(() => { row.style.backgroundColor = ""; }, 1000); // Trở về màu cũ sau 1 giây
+        }
+    }
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

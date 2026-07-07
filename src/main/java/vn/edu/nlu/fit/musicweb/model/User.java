@@ -37,4 +37,8 @@ public class User {
     // Trạng thái hoạt động của người dùng
     @Column(nullable = false)
     private boolean enabled = true;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 }
