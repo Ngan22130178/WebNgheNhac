@@ -6,7 +6,7 @@
 <%-- ==========================================
      1. NAVIGATION BAR CONTAINER 
      ========================================== --%>
-<nav class="navbar navbar-expand-lg border-bottom shadow-sm bg-body-tertiary" id="mainNavbar">
+<nav class="navbar navbar-expand-lg border-bottom shadow-sm bg-body-tertiary sticky-top" id="mainNavbar">
     <div class="container">
         
         <%-- Logo --%>
@@ -146,5 +146,10 @@
         cursor: pointer;
     }
     
-    /* ... (giữ nguyên style htmx-indicator cũ) ... */
+    .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1020; 
+    background-color: var(--bs-body-bg) !important; 
+}
 </style>
