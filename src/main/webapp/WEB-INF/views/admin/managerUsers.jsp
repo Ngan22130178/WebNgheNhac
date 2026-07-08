@@ -238,7 +238,7 @@ main {
     });
 
     function toggleLock(id, enable) {
-        const action = enable ? "Khóa" : "Mở khóa";
+        const action = enable ? "Mở khóa" : "Khóa";
         
         if (confirm('Bạn có chắc chắn muốn ' + action + ' tài khoản này không?')) {
             // Sử dụng fetch API để gọi tới Backend

@@ -82,6 +82,7 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/", true)
                 .permitAll()
             )
+            
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(info -> info.userService(customOAuth2UserService)) // KẾT NỐI SERVICE CỦA BẠN
                 .defaultSuccessUrl("/", true) // Trang chuyển hướng sau khi login thành công
