@@ -129,23 +129,45 @@ main {
             </button>
         </div>
         <div class="admin-container p-4 d-flex flex-column align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Quản lí bài hát</h3>
+            </div>
+        <div class="admin-container p-4 d-flex flex-column align-items-center">
             <h2 class="mb-4 text-center">Công cụ quản lý bài hát</h2>
+            
+            <div class="card p-3 shadow-sm border-0 mb-4" style="max-width: 800px; width: 100%; background-color: var(--card-bg);">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm bài hát/nghệ sĩ...">
+                    </div>
+                    <div class="col-md-3">
+                        <select id="sortOrder" class="form-select">
+                            <option value="none">Sắp xếp theo...</option>
+                            <option value="asc">Tên (A-Z)</option>
+                            <option value="desc">Tên (Z-A)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5 text-end">
+                        <button type="button" class="btn btn-outline-info" onclick="syncMusicData()">
+                            <i class="fa-solid fa-rotate me-2"></i>Đồng bộ hóa dữ liệu
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="card p-4 shadow-sm border-0 mx-auto" style="max-width: 500px; width: 100%; background-color: var(--card-bg);">
                 <h5 class="mb-3" style="color: var(--text-main);">Chọn tệp nhạc để tải lên hệ thống:</h5>
-        
                 <form action="/admin/songs/upload" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                    
                     <div class="mb-3">
-                        <input type="file" name="file" class="form-control" id="fileInput" multiple required 
-                            style="background-color: var(--card-bg); color: var(--text-main); border-color: var(--border-color);">
+                        <input type="file" name="file" class="form-control" id="fileInput" multiple required>
                     </div>
-                    
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fa-solid fa-cloud-arrow-up me-2"></i>Tải lên (Upload)
                     </button>
                 </form>
             </div>
+        </div>
         </div>
 
             <div class="mt-5">
