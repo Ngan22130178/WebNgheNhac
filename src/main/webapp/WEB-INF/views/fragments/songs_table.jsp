@@ -10,7 +10,7 @@
     <%-- Hàng hiển thị thông tin bài hát --%>
     <tr class="song-row">
         <td class="align-middle" style="cursor: pointer; color: #007bff;"
-            onclick="playNow('${safeUrl}', '${safeTitle}')">
+            onclick="playNow('${safeUrl}', '${safeTitle}', '${fn:escapeXml(song.artist)}')">
             ${song.title}
         </td>
         <td class="align-middle">${song.artist}</td>
@@ -21,7 +21,7 @@
         
         <td class="align-middle">
             <button class="btn btn-outline-primary btn-sm fw-bold me-1"
-                onclick="addToQueue('${safeUrl}', '${safeTitle}')">
+                onclick="addToQueue('${safeUrl}', '${safeTitle}', '${fn:escapeXml(song.artist)}')">
                 + Thêm
             </button>
 

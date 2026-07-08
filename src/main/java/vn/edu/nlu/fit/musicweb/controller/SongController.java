@@ -1,14 +1,20 @@
 package vn.edu.nlu.fit.musicweb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
 
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import java.nio.file.Path;
 
 @Controller
 @RequestMapping("/api/songs")
@@ -16,7 +22,6 @@ public class SongController {
 
     @Autowired private SongRepository songRepository;
     @Autowired private SongLyricsRepository songLyricsRepository;
-
     // ========================================================================
     // 1. NHÓM NẠP BẢNG DỮ LIỆU (VIEW FRAGMENTS)
     // ========================================================================
@@ -90,5 +95,20 @@ public class SongController {
                 .findFirst()
                 .map(SongLyrics::getContent)
                 .orElse("Chưa có lời bài hát.");
+    }
+
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> downloadSong(@PathVariable Long id) {
+        // 1. Lấy thông tin bài hát từ DB
+        Song song = songRepository.findById(id).orElse(null);
+        
+        // 2. Tải file từ hệ thống lưu trữ (ví dụ folder uploads)
+        Path path = Paths.get("uploads/" + song.getUrl());
+        Resource resource = new FileSystemResource(path);
+
+        // 3. Trả về file cho trình duyệt
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + song.getTitle() + ".mp3\"")
+                .body(resource);
     }
 }

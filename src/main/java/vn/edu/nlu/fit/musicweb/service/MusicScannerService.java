@@ -7,80 +7,92 @@ import jakarta.transaction.Transactional;
 import vn.edu.nlu.fit.musicweb.model.Song;
 import vn.edu.nlu.fit.musicweb.repository.SongRepository;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.stream.Collectors;
+import java.util.Set;
 @Service
 public class MusicScannerService {
 
-    @Autowired
+@Autowired
     private SongRepository songRepository;
 
-    @Transactional // Thêm vào đây để toàn bộ quá trình quét là một giao dịch
+    private static final String FOLDER_PATH = "D:/music-upload/audio/";
+
+    @Transactional
     public void scanAndSync() {
-        String folderPath = "D:/music-upload/audio/";
-        File folder = new File(folderPath);
-        
-        // Kiểm tra thư mục tồn tại
-        if (!folder.exists()) return; 
+        File folder = new File(FOLDER_PATH);
+        if (!folder.exists()) return;
 
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".mp3"));
         if (files == null) return;
 
-        // 1. Xóa các bản ghi trong DB mà file không còn tồn tại trên ổ D
+        // 1. Xóa các bản ghi không còn file
+        deleteMissingSongs(files);
+
+        // 2. Thêm các file mới
+        addNewSongs(files);
+    }
+
+    private void deleteMissingSongs(File[] existingFiles) {
+        // Tạo Set các file hiện có trên ổ đĩa để tra cứu O(1)
+        Set<String> filesOnDisk = Arrays.stream(existingFiles)
+                                        .map(f -> "/audio/" + f.getName())
+                                        .collect(Collectors.toSet());
+
         List<Song> allSongs = songRepository.findAll();
         for (Song song : allSongs) {
-            String fileName = song.getUrl().replace("/audio/", "");
-            File fileOnDisk = new File(folderPath + fileName);
-            if (!fileOnDisk.exists()) {
-                songRepository.delete(song); // Dùng delete(entity) sẽ an toàn hơn deleteByUrl
+            if (!filesOnDisk.contains(song.getUrl())) {
+                songRepository.delete(song);
             }
         }
+    }
 
-        // 2. Thêm các file mới trên ổ D:/music-upload/audio/ vào DB
-        List<String> existingUrls = songRepository.findAll().stream()
-                                                .map(Song::getUrl).toList();
+    private void addNewSongs(File[] existingFiles) {
+        // Lấy danh sách URL đang có trong DB
+        Set<String> existingUrlsInDb = songRepository.findAll().stream()
+                                                     .map(Song::getUrl)
+                                                     .collect(Collectors.toSet());
 
-        for (File file : files) {
-            String fileName = file.getName(); 
-            String fileUrl = "/audio/" + fileName;
+        for (File file : existingFiles) {
+            String fileUrl = "/audio/" + file.getName();
 
-            if (!existingUrls.contains(fileUrl)) {
-                // --- XỬ LÝ TÁCH TÊN BÀI HÁT VÀ NGHỆ SĨ ---
-                
-                // Cải tiến: Nếu file có chứa "_", chỉ cắt bỏ phần timestamp ở đầu. 
-                // Nếu không có "_" (hoặc "_" nằm ở vị trí khác), coi như tên file sạch.
-                String nameWithoutTimestamp = fileName;
-                if (fileName.contains("_")) {
-                    // Kiểm tra xem "_" có nằm ở vị trí hợp lý không (giả sử timestamp là các chữ số)
-                    String prefix = fileName.substring(0, fileName.indexOf("_"));
-                    if (prefix.matches("\\d+")) { // Nếu phần đầu là các chữ số
-                        nameWithoutTimestamp = fileName.substring(fileName.indexOf("_") + 1);
-                    }
-                }
-                
-                // Bỏ đuôi file: lấy chuỗi trước dấu "." cuối cùng
-                int lastDotIndex = nameWithoutTimestamp.lastIndexOf(".");
-                String nameOnly = (lastDotIndex != -1) ? nameWithoutTimestamp.substring(0, lastDotIndex) : nameWithoutTimestamp;
-
-                String title = nameOnly;
-                String artist = "Unknown";
-
-                // Tách Title - Artist dựa trên dấu "-"
-                int dashIndex = nameOnly.indexOf("-");
-                if (dashIndex != -1) {
-                    title = nameOnly.substring(0, dashIndex).trim();
-                    artist = nameOnly.substring(dashIndex + 1).trim();
-                }
-
-                // --- LƯU VÀO DATABASE ---
-                Song newSong = Song.builder()
-                        .title(title)
-                        .artist(artist)
-                        .url(fileUrl)
-                        .build();
-                
+            if (!existingUrlsInDb.contains(fileUrl)) {
+                Song newSong = parseFileToSong(file);
                 songRepository.save(newSong);
             }
         }
+    }
+
+    // Tách riêng logic parsing để code gọn hơn
+    private Song parseFileToSong(File file) {
+        String fileName = file.getName();
+        String nameWithoutTimestamp = fileName;
+
+        // Xử lý logic tách timestamp
+        if (fileName.contains("_")) {
+            String prefix = fileName.substring(0, fileName.indexOf("_"));
+            if (prefix.matches("\\d+")) {
+                nameWithoutTimestamp = fileName.substring(fileName.indexOf("_") + 1);
+            }
+        }
+
+        int lastDotIndex = nameWithoutTimestamp.lastIndexOf(".");
+        String nameOnly = (lastDotIndex != -1) ? nameWithoutTimestamp.substring(0, lastDotIndex) : nameWithoutTimestamp;
+
+        String title = nameOnly;
+        String artist = "Unknown";
+
+        int dashIndex = nameOnly.indexOf("-");
+        if (dashIndex != -1) {
+            title = nameOnly.substring(0, dashIndex).trim();
+            artist = nameOnly.substring(dashIndex + 1).trim();
+        }
+
+        return Song.builder()
+                .title(title)
+                .artist(artist)
+                .url("/audio/" + fileName)
+                .build();
     }
 }

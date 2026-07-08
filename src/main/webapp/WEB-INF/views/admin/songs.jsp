@@ -224,8 +224,9 @@ main {
     });
 
     function confirmDelete(id, title) {
-        // Không cần dùng confirm() nếu bạn muốn xóa ngay lập tức
-        // Nếu vẫn muốn xác nhận, bạn có thể giữ lại if(confirm(...))
+        if (!confirm('Bạn có chắc chắn muốn xóa bài hát: ' + title + '?')) {
+            return; 
+        }
         
         fetch('/admin/songs/delete/' + id, {
             method: 'POST',
@@ -302,6 +303,6 @@ function submitEditForm(event, formElement) {
         }
     }
     </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
 </body>
 </html>

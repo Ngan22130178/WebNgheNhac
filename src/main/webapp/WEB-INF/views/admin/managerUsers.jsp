@@ -150,9 +150,39 @@ main {
                                         <td>${user.id}</td>
                                         <td>${user.fullName}</td>
                                         <td>${user.email}</td>
-                                        <td>${user.enabled ? 'Hoạt động' : 'Không hoạt động'}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${user.enabled}">
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                                        <i class="fa-solid fa-check-circle me-1"></i> Hoạt động
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                                        <i class="fa-solid fa-times-circle me-1"></i> Không hoạt động
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td>${user.role}</td>
                                         <td>
+                                            <c:choose>
+                                                <%-- Nếu tài khoản đang mở (enabled = true) -> Hiện nút Khóa --%>
+                                                <c:when test="${user.enabled}">
+                                                    <button type="button" class="btn btn-sm btn-outline-warning" 
+                                                            onclick="toggleLock('${user.id}', false)" title="Khóa tài khoản">
+                                                        <i class="fa-solid fa-lock"></i>
+                                                    </button>
+                                                </c:when>
+                                                
+                                                <%-- Nếu tài khoản đang khóa (enabled = false) -> Hiện nút Mở khóa --%>
+                                                <c:otherwise>
+                                                    <button type="button" class="btn btn-sm btn-outline-success" 
+                                                            onclick="toggleLock('${user.id}', true)" title="Mở khóa tài khoản">
+                                                        <i class="fa-solid fa-unlock"></i>
+                                                    </button>
+                                                </c:otherwise>
+                                            </c:choose>
                                            <button type="button" class="btn btn-sm btn-outline-primary" 
                                                     data-bs-toggle="modal" data-bs-target="#editUserModal${user.id}">
                                                 <i class="fa-solid fa-pen"></i>
@@ -196,6 +226,7 @@ main {
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
     Cập nhật thành công!
 </div>
+    
 <script>
     document.getElementById('theme-toggle').addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
@@ -206,9 +237,28 @@ main {
         thead.classList.toggle('table-dark');
     });
 
+    function toggleLock(id, enable) {
+        const action = enable ? "Khóa" : "Mở khóa";
+        
+        if (confirm('Bạn có chắc chắn muốn ' + action + ' tài khoản này không?')) {
+            // Sử dụng fetch API để gọi tới Backend
+            fetch('/admin/managerUsers/toggleStatus/' + id, {
+                method: 'POST'
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload(); // Tải lại trang để cập nhật icon
+                } else {
+                    alert("Có lỗi xảy ra khi thực hiện.");
+                }
+            });
+        }
+    }
+
     function confirmDelete(id, title) {
-        // Không cần dùng confirm() nếu bạn muốn xóa ngay lập tức
-        // Nếu vẫn muốn xác nhận, bạn có thể giữ lại if(confirm(...))
+        if (!confirm('Bạn có chắc chắn muốn xóa người dùng: ' + title + '?')) {
+            return; 
+        }
         
         fetch('/admin/managerUsers/delete/' + id, {
             method: 'POST',
@@ -230,32 +280,32 @@ main {
         .catch(error => console.error('Error:', error));
     }
 
-function submitEditForm(event, formElement) {
-    event.preventDefault(); 
-    
-    const formData = new FormData(formElement);
-    const id = formData.get('id');
+    function submitEditForm(event, formElement) {
+        event.preventDefault(); 
+        
+        const formData = new FormData(formElement);
+        const id = formData.get('id');
 
-    fetch('/admin/managerUsers/save/' + id, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        if (data === "success") {
-            // Hiển thị thông báo thay vì alert
-            showToast("Cập nhật thành công!");
-            
-            updateRowInTable(id, formData);
-            const modalEl = document.getElementById('editUserModal' + id);
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-        } else {
-            showToast("Có lỗi xảy ra!", "#dc3545"); // Màu đỏ cho lỗi
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+        fetch('/admin/managerUsers/save/' + id, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data === "success") {
+                // Hiển thị thông báo thay vì alert
+                showToast("Cập nhật thành công!");
+                
+                updateRowInTable(id, formData);
+                const modalEl = document.getElementById('editUserModal' + id);
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+            } else {
+                showToast("Có lỗi xảy ra!", "#dc3545"); // Màu đỏ cho lỗi
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 
     // Hàm hiển thị thông báo
     function showToast(message, color = "#28a745") {
@@ -269,6 +319,7 @@ function submitEditForm(event, formElement) {
             toast.style.display = 'none';
         }, 2500);
     }
+
     function updateRowInTable(id, formData) {
         // 1. Tìm thẻ <tr> có id="row-user-${user.id}"
         const row = document.getElementById('row-user-' + id);
