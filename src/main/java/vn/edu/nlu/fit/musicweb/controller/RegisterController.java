@@ -41,6 +41,7 @@ public class RegisterController {
                 .password(passwordEncoder.encode(password)) // Mã hóa mật khẩu
                 .fullName(fullName)
                 .role("ROLE_USER") // Mặc định là user thường
+                .enabled(true)
                 .build();
 
         userRepository.save(newUser);

@@ -42,6 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         .googleId(googleId)
                         .provider("GOOGLE")
                         .role("ROLE_USER")
+                        .enabled(true)
                         .build();
                 return userRepository.save(newUser);
             });
