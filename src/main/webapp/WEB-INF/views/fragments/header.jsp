@@ -3,6 +3,21 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
+<style>
+    .scrollable-menu {
+        /* 7 dòng*/
+        max-height: 275px; 
+        
+        /* Tự động hiển thị thanh cuộn khi vượt quá độ cao này */
+        overflow-y: auto;
+        
+        /* Ngăn nội dung bị tràn ra ngoài theo chiều ngang */
+        overflow-x: hidden;
+        
+        /* Đảm bảo menu không bị dính vào viền trình duyệt */
+        padding: 0.5rem 0;
+    }
+</style>
 <%-- ==========================================
      1. NAVIGATION BAR CONTAINER 
      ========================================== --%>
@@ -10,7 +25,7 @@
     <div class="container">
         
         <%-- Logo --%>
-        <a class="navbar-brand fw-bold" href="/" hx-get="/api/songs" hx-target="#songListBody">
+        <a class="navbar-brand fw-bold" href="#" hx-get="/api/songs/all" hx-target="#songListBody">
             🎵 MusicWeb
         </a>
 
@@ -38,7 +53,7 @@
                            hx-indicator="#globalIndicator">
                            ${labels[i]}
                         </a>
-                        <ul class="dropdown-menu" id="${categories[i]}-menu">
+                        <ul class="dropdown-menu scrollable-menu" id="${categories[i]}-menu">
                             <li><a class="dropdown-item">Đang tải...</a></li>
                         </ul>
                     </li>
