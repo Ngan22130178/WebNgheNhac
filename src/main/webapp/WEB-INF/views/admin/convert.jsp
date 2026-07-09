@@ -191,6 +191,31 @@ main {
             toast.style.display = 'none';
         }, 2500);
     }
+
+    // 
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Chặn reload trang
+        
+        const formData = new FormData(this);
+        const toast = document.getElementById('toastNotification');
+        
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                showToast(result.message, "#28a745"); // Màu xanh lá
+            } else {
+                showToast(result.message, "#dc3545"); // Màu đỏ cho lỗi
+            }
+        } catch (error) {
+            showToast("Có lỗi xảy ra khi kết nối server", "#dc3545");
+        }
+    });
     </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
 </body>
