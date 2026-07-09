@@ -10,13 +10,16 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.transaction.Transactional;
+
 @Repository
-public interface SongRepository extends JpaRepository<Song, Long> { //JPARepository cung cấp các phương thức CRUD cơ bản, JpaSpecificationExecutor hỗ trợ tìm kiếm nâng cao
+public interface SongRepository extends JpaRepository<Song, Long> { // JPARepository cung cấp các phương thức CRUD cơ
+                                                                    // bản, JpaSpecificationExecutor hỗ trợ tìm kiếm
+                                                                    // nâng cao
 
     // ========================================================================
     // 1. NHÓM TÌM KIẾM DỮ LIỆU (Search)
     // ========================================================================
-    
+
     @Query("SELECT s FROM Song s WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Song> findByTitleContainingIgnoreCase(@Param("keyword") String keyword);
 
@@ -44,14 +47,21 @@ public interface SongRepository extends JpaRepository<Song, Long> { //JPAReposit
     // Dùng để tìm kiếm bài hát theo nhiều tiêu chí trong một truy vấn duy nhất
     // ========================================================================
     @Query("SELECT s FROM Song s WHERE " +
-       "LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-       "LOWER(s.artist) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-       "LOWER(s.albumName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-       "LOWER(s.genre) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(s.artist) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(s.albumName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(s.genre) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Song> findByKeyword(@Param("keyword") String keyword);
 
-    @Modifying // Đánh dấu phương thức này là một thao tác thay đổi dữ liệu (INSERT, UPDATE, DELETE)
+    @Modifying // Đánh dấu phương thức này là một thao tác thay đổi dữ liệu
     @Transactional // Transactional để đảm bảo rằng thao tác xóa được thực hiện trong một giao dịch
     @Query("DELETE FROM Song s WHERE s.url = :url")
     void deleteByUrl(@Param("url") String url);
+
+    // Tìm danh sách bài hát theo thể loại cụ thể
+    List<Song> findByGenre(String genre);
+
+    // Tìm danh sách bài hát theo tên album cụ thể
+    List<Song> findByAlbumName(String albumName);
+
 }

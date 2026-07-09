@@ -28,8 +28,13 @@ public class User {
     private String fullName;
     private String avatarUrl;
 
-    @ElementCollection 
-    private List<String> favoriteSongIds;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_favorite_songs",                  // Tên bảng trung gian sẽ tự sinh trong DB
+        joinColumns = @JoinColumn(name = "user_id"),    // Liên kết tới id của bảng users
+        inverseJoinColumns = @JoinColumn(name = "song_id") // Liên kết tới id của bảng songs
+    )
+    private List<Song> favoriteSongs = new java.util.ArrayList<>();
 
     @Column(nullable = true)
     private String provider = "LOCAL"; 

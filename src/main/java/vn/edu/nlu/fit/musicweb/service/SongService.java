@@ -18,6 +18,9 @@ public class SongService {
     @Autowired
     private SongRepository songRepository;
 
+    @Autowired
+private vn.edu.nlu.fit.musicweb.repository.UserRepository userRepository;
+
     // READ: Xem tất cả
     public List<Song> getAllSongs() { return songRepository.findAll(); }
     
@@ -45,7 +48,53 @@ public class SongService {
 
         // 3. Lưu lại (đã có ID nên JPA sẽ thực hiện UPDATE)
         songRepository.save(existingSong);
+
     }
+
+    // Lấy bài hát theo Thể loại 
+    public List<Song> getSongsByGenre(String genre) {
+        return songRepository.findByGenre(genre);
+    }
+
+    // Lấy bài hát theo Tên Album 
+    public List<Song> getSongsByAlbumName(String albumName) {
+        return songRepository.findByAlbumName(albumName);
+    }
+
+    public List<Song> getFavoriteSongsByUser(String username) {
+        return userRepository.findFavoriteSongsByUsername(username);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+public boolean toggleFavorite(String username, Long songId) {
+    // 1. Tìm User dựa trên email/username
+    vn.edu.nlu.fit.musicweb.model.User user = userRepository.findByEmail(username) 
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+    // 2. Tìm bài hát dựa trên songId
+    Song song = songRepository.findById(songId)
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy bài hát"));
+
+    // 3. Lấy danh sách bài hát yêu thích hiện tại của User ra (Mapped bởi JPA)
+    List<Song> favoriteSongs = user.getFavoriteSongs();
+    if (favoriteSongs == null) {
+        favoriteSongs = new ArrayList<>();
+    }
+
+    boolean isAlreadyLiked = favoriteSongs.stream().anyMatch(s -> s.getId().equals(songId));
+
+    if (isAlreadyLiked) {
+        // Nếu đã thích -> Xóa khỏi danh sách đối tượng
+        favoriteSongs.removeIf(s -> s.getId().equals(songId));
+        userRepository.save(user); // Hibernate tự động xóa bản ghi ở bảng trung gian
+        return false; 
+    } else {
+        // Nếu chưa thích -> Thêm vào danh sách đối tượng
+        favoriteSongs.add(song);
+        userRepository.save(user); // Hibernate tự động thêm bản ghi vào bảng trung gian
+        return true; 
+    }
+}
 
     // Regex cải tiến: Bắt từng tag thời gian, hỗ trợ các dòng có nhiều tag
     private static final Pattern TIME_PATTERN = Pattern.compile("\\[(\\d{2}):(\\d{2})[\\.:](\\d{2,3})\\]");

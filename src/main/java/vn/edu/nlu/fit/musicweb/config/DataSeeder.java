@@ -7,66 +7,64 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import vn.edu.nlu.fit.musicweb.model.*;
 import vn.edu.nlu.fit.musicweb.repository.*;
 import java.util.List;
+
 @Configuration
 public class DataSeeder {
 
-    // Dữ liệu mẫu cho các bài hát và lời bài hát    
     @Bean
     CommandLineRunner initDatabase(SongRepository songRepo, SongLyricsRepository lyricsRepo, UserRepository userRepo, PasswordEncoder passwordEncoder) {
         return args -> {
-                songRepo.deleteAll();
-                lyricsRepo.deleteAll();
-                // 1. Khởi tạo dữ liệu người dùng (User)
-                if (userRepo.count() == 0) {
-                        // Khởi tạo User với mật khẩu đã mã hóa
-                        List<User> users = List.of(
-                                
-                                User.builder()
-                                .email("admin@musicweb.com")
-                                .password(passwordEncoder.encode("admin123")) // Mã hóa ở đây
-                                .role("ROLE_ADMIN")
-                                .fullName("Quản trị hệ thống")
-                                .enabled(true)
-                                .provider("LOCAL")
-                                .build(),
-                                User.builder()
-                                .email("nguyenvana@gmail.com")
-                                .password(passwordEncoder.encode("user123")) // Mã hóa ở đây
-                                .role("ROLE_USER")
-                                .fullName("Nguyễn Văn A")
-                                .enabled(true)
-                                .provider("LOCAL")
-                                .build(),
-                                User.builder()
-                                .email("tranthib@gmail.com")
-                                .password(passwordEncoder.encode("user123"))
-                                .role("ROLE_USER")
-                                .fullName("Trần Thị B")
-                                .enabled(true)
-                                .provider("LOCAL")
-                                .build(),
-                                User.builder()
-                                .email("lequangc@gmail.com")
-                                .password(passwordEncoder.encode("user123"))
-                                .role("ROLE_USER")
-                                .fullName("Lê Quang C")
-                                .enabled(true)
-                                .provider("LOCAL")
-                                .build(),
-                                User.builder()
-                                .email("phamthid@gmail.com")
-                                .password(passwordEncoder.encode("user123"))
-                                .role("ROLE_USER")
-                                .fullName("Phạm Thị D")
-                                .enabled(false)
-                                .provider("LOCAL")
-                                .build()
-                        );
-                        userRepo.saveAll(users);
-                        System.out.println("Đã khởi tạo thành công 5 người dùng!");
-                }
-                
-                // Khởi tạo dữ liệu bài hát và lời bài hát
+            // 1. Khởi tạo dữ liệu người dùng (User) - Chỉ tạo nếu chưa có
+            if (userRepo.count() == 0) {
+                // Khởi tạo User với mật khẩu đã mã hóa
+                List<User> users = List.of(
+                        User.builder()
+                        .email("admin@musicweb.com")
+                        .password(passwordEncoder.encode("admin123"))
+                        .role("ROLE_ADMIN")
+                        .fullName("Quản trị hệ thống")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("nguyenvana@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("ROLE_USER")
+                        .fullName("Nguyễn Văn A")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("tranthib@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("ROLE_USER")
+                        .fullName("Trần Thị B")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("lequangc@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("ROLE_USER")
+                        .fullName("Lê Quang C")
+                        .enabled(true)
+                        .provider("LOCAL")
+                        .build(),
+                        User.builder()
+                        .email("phamthid@gmail.com")
+                        .password(passwordEncoder.encode("user123"))
+                        .role("ROLE_USER")
+                        .fullName("Phạm Thị D")
+                        .enabled(false)
+                        .provider("LOCAL")
+                        .build()
+                );
+                userRepo.saveAll(users);
+                System.out.println("Đã khởi tạo thành công 5 người dùng!");
+            }    
+
+            // 2. Khởi tạo dữ liệu bài hát và lời bài hát - CHỈ TẠO NẾU DATABASE TRỐNG
+            if (songRepo.count() == 0) {
                 // Cấu trúc: addSong(songRepo, lyricsRepo, Title, Artist, Url, Genre, Album, Lang, FilePath)
 
                 // --- Các bài hát hiện có ---
@@ -89,57 +87,46 @@ public class DataSeeder {
                 addSong(songRepo, lyricsRepo, "Hoa Soi Sáng Nơi Đây", "Nguyệt Mộng", "/audio/Hoa_soi_sáng_nơi_đây-Nguyệt_Mộng.mp3", "Nhạc Trẻ", "Album Mới", "vi", "/audio/Hoa_soi_sáng_nơi_đây-Nguyệt_Mộng.lrc");
 
                 // --- BÀI HÁT MỚI THÊM VÀO ---
-                // Ví dụ bài hát có cả 2 ngôn ngữ hoặc 2 định dạng khác nhau
-                // --- Cập nhật "Vân Sơn Ký Tuyết" ---
-                // Phiên bản tiếng Việt (.lrc)
-                addSong(songRepo, lyricsRepo, "Vân Sơn Ký Tuyết", "Tả Từ", "/audio/van_son_ky_tuyet_ta_tu.mp3", 
-                        "Bolero", "Tuyển Tập Tả Từ", "vi", "/audio/van_son_ky_tuyet_ta_tu.lrc");
+                // --- Cập nhật nhiều phiên bản lời cho "Vân Sơn Ký Tuyết" ---
+                addSong(songRepo, lyricsRepo, "Vân Sơn Ký Tuyết", "Tả Từ", "/audio/van_son_ky_tuyet_ta_tu.mp3", "Bolero", "Tuyển Tập Tả Từ", "vi", "/audio/van_son_ky_tuyet_ta_tu.lrc");
+                addSong(songRepo, lyricsRepo, "Vân Sơn Ký Tuyết", "Tả Từ", "/audio/van_son_ky_tuyet_ta_tu.mp3", "Bolero", "Tuyển Tập Tả Từ", "zh", "/audio/van_son_ky_tuyet_ta_tu_zh.txt");
 
-                // Nếu bạn có thêm phiên bản lời khác, ví dụ tiếng Trung (.txt)
-                addSong(songRepo, lyricsRepo, "Vân Sơn Ký Tuyết", "Tả Từ", "/audio/van_son_ky_tuyet_ta_tu.mp3", 
-                        "Bolero", "Tuyển Tập Tả Từ", "zh", "/audio/van_son_ky_tuyet_ta_tu_zh.txt");
+                // --- Cập nhật nhiều phiên bản lời cho "Nhất Tư Bách Hài Bất Tự Do" ---
+                addSong(songRepo, lyricsRepo, "Nhất Tư Bách Hài Bất Tự Do", "Ca sĩ 1", "/audio/nhat_tu_bach_hai_bat_tu_do.mp3", "Nhạc Trẻ", "Album Hè 2026", "vi", "/audio/nhat_tu_bach_hai_bat_tu_do.lrc");
+                addSong(songRepo, lyricsRepo, "Nhất Tư Bách Hài Bất Tự Do", "Ca sĩ 1", "/audio/nhat_tu_bach_hai_bat_tu_do.mp3", "Nhạc Trẻ", "Album Hè 2026", "zh", "/audio/nhat_tu_bach_hai_bat_tu_do_zh.txt");
 
-
-                // --- Cập nhật "Nhất Tư Bách Hài Bất Tự Do" ---
-                // Phiên bản tiếng Việt (.lrc)
-                addSong(songRepo, lyricsRepo, "Nhất Tư Bách Hài Bất Tự Do", "Ca sĩ 1", "/audio/nhat_tu_bach_hai_bat_tu_do.mp3", 
-                        "Nhạc Trẻ", "Album Hè 2026", "vi", "/audio/nhat_tu_bach_hai_bat_tu_do.lrc");
-
-                // Ví dụ bạn có thêm bản dịch sang tiếng Anh (.txt)
-                addSong(songRepo, lyricsRepo, "Nhất Tư Bách Hài Bất Tự Do", "Ca sĩ 1", "/audio/nhat_tu_bach_hai_bat_tu_do.mp3", 
-                        "Nhạc Trẻ", "Album Hè 2026", "zh", "/audio/nhat_tu_bach_hai_bat_tu_do_zh.txt");
-
+                System.out.println("Đã khởi tạo thành công danh sách bài hát mẫu!");
+            }
         };
-  
     }
 
-        private void addSong(SongRepository songRepo, SongLyricsRepository lyricsRepo, 
-                     String title, String artist, String url, String genre, 
-                     String album, String lang, String filePath) {
-    
-                // 1. Tìm hoặc tạo Song
-                Song song = songRepo.findByTitle(title).orElse(null);
-                
-                if (song == null) {
-                        song = Song.builder()
-                                .title(title)
-                                .artist(artist)
-                                .url(url)
-                                .genre(genre)
-                                .albumName(album)
-                                .build();
-                        song = songRepo.save(song); // Lưu và lấy lại đối tượng song đã có ID
-                }
+    private void addSong(SongRepository songRepo, SongLyricsRepository lyricsRepo, 
+                         String title, String artist, String url, String genre, 
+                         String album, String lang, String filePath) {
 
-                // 2. Tạo đối tượng Lyrics
-                String format = filePath.toLowerCase().endsWith(".lrc") ? "LRC" : "TXT";
-                SongLyrics lyrics = new SongLyrics();
-                lyrics.setLanguage(lang);
-                lyrics.setFormat(format);
-                lyrics.setFileUrl(filePath);
-                lyrics.setSong(song);
-                
-                // 3. Lưu lyrics
-                lyricsRepo.save(lyrics); 
+        // 1. Tìm hoặc tạo Song
+        Song song = songRepo.findByTitle(title).orElse(null);
+
+        if (song == null) {
+            song = Song.builder()
+                    .title(title)
+                    .artist(artist)
+                    .url(url)
+                    .genre(genre)
+                    .albumName(album)
+                    .build();
+            song = songRepo.save(song); // Lưu và lấy lại đối tượng song đã có ID
         }
+
+        // 2. Tạo đối tượng Lyrics
+        String format = filePath.toLowerCase().endsWith(".lrc") ? "LRC" : "TXT";
+        SongLyrics lyrics = new SongLyrics();
+        lyrics.setLanguage(lang);
+        lyrics.setFormat(format);
+        lyrics.setFileUrl(filePath);
+        lyrics.setSong(song);
+
+        // 3. Lưu lyrics
+        lyricsRepo.save(lyrics); 
+    }
 }

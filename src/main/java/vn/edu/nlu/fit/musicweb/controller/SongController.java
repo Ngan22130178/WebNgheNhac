@@ -21,6 +21,7 @@ import java.nio.file.Path;
 public class SongController {
 
     @Autowired private SongRepository songRepository;
+    @Autowired private SongLyricsRepository songLyricsRepository;
     // ========================================================================
     // 1. NHÓM NẠP BẢNG DỮ LIỆU (VIEW FRAGMENTS)
     // ========================================================================
@@ -54,6 +55,8 @@ public class SongController {
         // Quan trọng: Trả về cùng path với trang chủ để HTMX render đúng
         return "fragments/songs_table"; 
     }
+
+    
 
     @GetMapping("/search")
     public String searchSongs(@RequestParam(value = "q") String keyword, Model model) {
@@ -101,4 +104,5 @@ public class SongController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + song.getTitle() + ".mp3\"")
                 .body(resource);
     }
+
 }
