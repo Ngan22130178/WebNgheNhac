@@ -42,6 +42,7 @@ public class RegisterController {
                 .fullName(fullName)
                 .role("ROLE_USER") // Mặc định là user thường
                 .enabled(true)
+                .provider("LOCAL")
                 .build();
 
         userRepository.save(newUser);
