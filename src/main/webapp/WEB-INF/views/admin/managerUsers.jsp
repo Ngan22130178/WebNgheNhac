@@ -112,8 +112,9 @@ main {
             <a class="nav-link ${currentPage == 'users' ? 'active' : ''}" href="/admin/managerUsers">
                 <i class="fa-solid fa-user me-2"></i> Quản lý người dùng
             </a>
-            <a class="nav-link ${currentPage == 'genres' ? 'active' : ''}" href="/admin/genres">
-                <i class="fa-solid fa-list me-2"></i> Thể loại
+            <a class="nav-link ${currentPage == 'convert' ? 'active' : ''}" href="/admin/convert">
+                <i class="fa-solid fa-file-video me-2"></i> 
+                <span>Video to MP3</span>
             </a>
             <a class="nav-link ${currentPage == 'settings' ? 'active' : ''}" href="/admin/settings">
                 <i class="fa-solid fa-gear me-2"></i> Cài đặt

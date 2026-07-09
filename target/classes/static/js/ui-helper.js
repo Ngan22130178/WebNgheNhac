@@ -85,39 +85,6 @@ function updateQueueMenu() {
     });
 }
 
-// ==========================================
-// 3. NHÓM QUẢN LÝ LỜI BÀI HÁT (Lyrics)
-// ==========================================
-async function loadLyricsMenu() {
-    const menu = document.getElementById('lyricsMenu');
-    const currentSong = queue[currentIndex];
-
-    if (!menu) return;
-    if (!currentSong) {
-        menu.innerHTML = '<li class="px-3 text-muted">Chưa có bài hát nào</li>';
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/songs/${currentSong.id}/lyrics`);
-        const lyricsList = await response.json();
-
-        menu.innerHTML = '';
-        if (lyricsList.length === 0) {
-            menu.innerHTML = '<li class="px-3 text-muted">Không có lời bài hát</li>';
-            return;
-        }
-
-        lyricsList.forEach(lyric => {
-            const li = document.createElement('li');
-            li.innerHTML = `<a class="dropdown-item" href="#">${lyric.language.toUpperCase()} (${lyric.format})</a>`;
-            li.onclick = (e) => { e.preventDefault(); displayLyrics(lyric); };
-            menu.appendChild(li);
-        });
-    } catch (e) {
-        console.error("Lỗi khi load menu lời:", e);
-    }
-}
 
 async function displayLyrics(lyric) {
     const modal = new bootstrap.Modal(document.getElementById('lyricsModal'));

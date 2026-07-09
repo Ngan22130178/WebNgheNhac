@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.nlu.fit.musicweb.model.Song;
 import java.util.List;
+import java.util.Optional;
+
 import jakarta.transaction.Transactional;
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long> { //JPARepository cung cấp các phương thức CRUD cơ bản, JpaSpecificationExecutor hỗ trợ tìm kiếm nâng cao
@@ -25,6 +27,8 @@ public interface SongRepository extends JpaRepository<Song, Long> { //JPAReposit
     // 2. NHÓM DANH MỤC LỌC (Distinct Filters)
     // Dùng để đổ dữ liệu vào các menu Thể loại, Album, Ca sĩ
     // ========================================================================
+    @Query("SELECT s FROM Song s WHERE s.title = :title")
+    Optional<Song> findByTitle(@Param("title") String title);
 
     @Query("SELECT DISTINCT s.genre FROM Song s WHERE s.genre IS NOT NULL AND s.genre <> ''")
     List<String> findDistinctGenres();

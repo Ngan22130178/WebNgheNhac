@@ -38,6 +38,7 @@
                         <input type="file" class="form-control mt-2" onchange="updateUrl(this, '${requestScope.song.id}')">
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                     <button type="submit" class="btn btn-primary">Cập nhật</button>

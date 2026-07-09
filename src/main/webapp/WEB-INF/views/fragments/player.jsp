@@ -89,8 +89,12 @@
             </button>
 
             <%-- Nút Lời --%>
-            <button id="lyricsBtn" class="btn btn-sm btn-outline-secondary" onclick="toggleLyrics()" title="Lời bài hát">
-                <i class="fa-solid fa-music"></i></button>
+            <button id="lyricsBtn" 
+                    class="btn btn-sm btn-outline-secondary" 
+                    onclick="toggleLyrics()" 
+                    title="Lời bài hát">
+                <i class="fa-solid fa-music"></i>
+            </button>
 
             <%-- Nút Shuffle --%>
             <button id="shuffleBtn" class="btn btn-sm btn-outline-secondary" onclick="toggleShuffle()" title="Trộn bài">
@@ -140,3 +144,12 @@
             </div>
     </div>
 </div>
+
+<script src="js/player-state.js"></script>
+<script src="js/player-core.js"></script>
+<script src="js/player-dispatcher.js"></script>
+<script src="js/player-strategies.js"></script>
+<script src="js/player-controls.js"></script>
+<script src="js/player-ui.js"></script>
+<script src="js/ui-helper.js"></script>
+<script src="js/lyrics-handler.js"></script>

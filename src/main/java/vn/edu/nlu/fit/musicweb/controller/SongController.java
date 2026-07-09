@@ -21,7 +21,6 @@ import java.nio.file.Path;
 public class SongController {
 
     @Autowired private SongRepository songRepository;
-    @Autowired private SongLyricsRepository songLyricsRepository;
     // ========================================================================
     // 1. NHÓM NẠP BẢNG DỮ LIỆU (VIEW FRAGMENTS)
     // ========================================================================
@@ -86,15 +85,6 @@ public class SongController {
         return list.stream()
             .map(item -> "<li><a class='dropdown-item' href='#' hx-get='/api/songs/filter?type=" + type + "&value=" + item + "' hx-target='#songListBody'>" + item + "</a></li>")
             .collect(Collectors.joining());
-    }
-
-    @GetMapping("/lyrics/{id}")
-    @ResponseBody
-    public String getLyricsApi(@PathVariable Long id) {
-        return songLyricsRepository.findBySongId(id).stream()
-                .findFirst()
-                .map(SongLyrics::getContent)
-                .orElse("Chưa có lời bài hát.");
     }
 
     @GetMapping("/download/{id}")
