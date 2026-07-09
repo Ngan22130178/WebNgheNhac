@@ -11,25 +11,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
-        /* [LAYOUT FIX: Đảm bảo footer luôn ở dưới và không bị che bởi player] */
-        html, body { height: 100%; margin: 0; }
-        body { 
-            display: flex; 
-            flex-direction: column; 
-            transition: background-color 0.3s, color 0.3s; 
-        }
-        main { flex: 1; padding-bottom: 20px; } /* main tự giãn nở */
-        
+        body { transition: background-color 0.3s, color 0.3s; }
         .htmx-hidden { display: none !important; }
+        /* Đảm bảo trình phát không bị che khuất bởi các phần tử khác */
+        main { padding-bottom: 100px; } 
+        
     </style>
 </head>
 
 <body>
 
-    <%-- 1. HEADER --%>
     <jsp:include page="fragments/header.jsp" />
 
-    <%-- 2. MAIN CONTENT (Tự đẩy footer xuống) --%>
+
     <main id="content" class="container mt-4">
         <table class="table table-hover table-striped" id="songTable">
             <thead class="table-dark">
@@ -38,12 +32,14 @@
                     <th>Ca sĩ</th>
                     <th>Thể loại</th>
                     <th>Album</th>
-                    <th>Nút</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
+            <%-- HTMX nạp dữ liệu vào bảng khi trang load xong --%>
             <tbody id="songListBody">
                 <c:choose>
                     <c:when test="${not empty songs}">
+                        <%-- Gọi file fragment trực tiếp tại đây --%>
                         <jsp:include page="fragments/songs_table.jsp" />
                     </c:when>
                     <c:otherwise>
@@ -54,29 +50,27 @@
         </table>
     </main>
  
-    <%-- 3. FOOTER & PLAYER (Player nằm ngoài luồng main để fix bottom) --%>
     <jsp:include page="fragments/footer.jsp" />
     <jsp:include page="fragments/player.jsp" />
 
-    <%-- 4. EXTERNAL SCRIPTS --%>
     <script src="https://unpkg.com/htmx.org@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <%-- 5. MODULE SCRIPTS (Thứ tự nạp quan trọng) --%>
-    <script> document.addEventListener('DOMContentLoaded', () => { initTheme(); }); </script>
-    <script src="js/player-state.js"></script>
-    <script src="js/player-core.js"></script>
-    <script src="js/player-dispatcher.js"></script>
-    <script src="js/player-strategies.js"></script>
-    <script src="js/player-playback.js"></script>
-    <script src="js/player-ui.js"></script>
-    <script src="js/ui-helper.js"></script>
-    <script src="js/lyrics-handler.js"></script>
-
-    <%-- 6. HTMX LOGGING --%>
+    <script src="/js/ui-helper.js"></script>
     <script>
-        document.body.addEventListener('htmx:afterOnLoad', (evt) => console.log("HTMX load ok"));
-        document.body.addEventListener('htmx:responseError', (evt) => console.error("HTMX error"));
+        // Đảm bảo hàm này được gọi khi DOM đã sẵn sàng
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+        });
     </script>
+    <script src="/js/player.js"></script> 
+    <script>
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        console.log("HTMX load thành công:", evt.detail.xhr.responseText);
+    });
+    document.body.addEventListener('htmx:responseError', function(evt) {
+        console.error("HTMX lỗi:", evt.detail.xhr.status, evt.detail.xhr.responseText);
+    });
+</script>
 </body>
 </html>

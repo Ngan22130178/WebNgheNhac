@@ -168,4 +168,3 @@
     background-color: var(--bs-body-bg) !important; 
 }
 </style>
-<script src="js/player-ui.js"></script>
