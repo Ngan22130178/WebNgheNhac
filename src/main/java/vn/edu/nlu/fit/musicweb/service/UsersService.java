@@ -31,25 +31,20 @@ public class UsersService {
         return userRepository.findByEmail(email).orElse(null);
     }
 
-    /**
-     * Hàm đổi mật khẩu bảo mật
-     */
     public boolean changePassword(Long userId, String currentPassword, String newPassword) {
-        User user = getUserById(userId);
+        User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return false;
         }
 
-        // Kiểm tra xem mật khẩu hiện tại có khớp với mật khẩu cũ trong DB không
+        //Dùng passwordEncoder.matches() để so sánh mật khẩu thô và mật khẩu đã hash trong DB
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            return false;
+            return false; 
         }
 
-        // TIẾN HÀNH MÃ HÓA MẬT KHẨU MỚI TRƯỚC KHI LƯU
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(encodedPassword);
-
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return true;
     }
+
 }

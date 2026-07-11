@@ -103,8 +103,13 @@
                                 ${userDisplayName}
                             </li>
                             <li>
+<<<<<<< Updated upstream
                                 <a class="dropdown-item" href="/profile">
                                     <i class="fa-solid fa-user-gear me-2"></i> Cá nhân
+=======
+                                <a class="dropdown-item" href="/user/profile">
+                                    <i class="fa-solid fa-user-gear me-2"></i> Tài khoản của tôi
+>>>>>>> Stashed changes
                                 </a>
                             </li>
                             <sec:authorize access="hasRole('ADMIN')">
@@ -156,10 +161,15 @@
         background-color: var(--bs-body-bg) !important;
     }
 </style>
+<<<<<<< Updated upstream
 
 <script src="js/player-ui.js"></script>
 
 <%-- Chèn đoạn này vào dưới cùng file header.jsp --%>
+=======
+<script src="js/player-ui.js"></script>
+
+>>>>>>> Stashed changes
 <script>
     function toggleHeartUI(songId, title, artist) {
         // 1. Tạo nội dung câu thông báo đúng định dạng: "Đã thêm: Tên bài hát - Ca sĩ"
